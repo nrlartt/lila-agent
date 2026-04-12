@@ -6,7 +6,7 @@
         "args": ["mcp/lila-server.mjs"],
         "cwd": "",
         "env": {
-          "LILA_BASE_URL": ""
+          "LILA_BASE_URL": "https://lilagent.xyz"
         }
       }
     }

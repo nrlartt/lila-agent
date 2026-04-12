@@ -2,6 +2,7 @@
   "name": "lila-agent",
   "version": "1.0.0",
   "description": "LILA - AI Agent Terminal with x402 Micropayments on Stellar",
+  "homepage": "https://lilagent.xyz",
   "license": "MIT",
   "type": "module",
   "scripts": {

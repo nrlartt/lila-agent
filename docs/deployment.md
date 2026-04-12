@@ -1,5 +1,14 @@
 # Deployment
 
+## Production domain (`lilagent.xyz`)
+
+The public deployment is **`https://lilagent.xyz`**.
+
+- **Browser:** SPA and API on the **same origin** — leave **`VITE_API_ORIGIN`** unset so the terminal uses relative `/api/*` URLs.
+- **CORS:** set **`CORS_ORIGIN=https://lilagent.xyz`** (and `www` only if you use it; add both comma-separated if needed).
+- **Agents (OpenClaw MCP, scripts):** set **`LILA_BASE_URL`** / **`LILA_PUBLIC_URL`** to **`https://lilagent.xyz`** (no trailing slash). See [OpenClaw & MCP](openclaw-mcp.md).
+- **TLS:** terminate HTTPS at your reverse proxy; then set **`ENABLE_HSTS=true`** only when end-to-end HTTPS is correct.
+
 ## Build
 
 ```bash

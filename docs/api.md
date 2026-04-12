@@ -1,6 +1,6 @@
 # API reference
 
-Base URL is your deployment origin (e.g. `https://api.example.com` or `http://localhost:3001` in production-only mode).
+Base URL is your deployment origin. **Production:** `https://lilagent.xyz` (same origin for SPA + API when deployed per [Deployment](deployment.md)). Local: `http://localhost:3001`.
 
 All JSON bodies use `Content-Type: application/json` unless noted.
 

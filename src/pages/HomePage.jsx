@@ -44,7 +44,7 @@ function IconX() {
 
 export default function HomePage() {
   const progressRef = useRef(null);
-  const { docsUrl, githubUrl, xUrl } = getSiteLinks();
+  const { siteUrl, docsUrl, githubUrl, xUrl } = getSiteLinks();
   /** Hero is above the fold: IO can miss first paint — start hidden, then add in-view after layout (LAB-style kinetic). */
   const [heroReveal, setHeroReveal] = useState(false);
 
@@ -470,7 +470,17 @@ export default function HomePage() {
                 <span className="home-brand-dot" aria-hidden />
                 <span className="home-brand-text">LILA // SYSTEM</span>
               </div>
-              <p className="home-footer-meta">Neural terminal · x402 · Stellar</p>
+              <p className="home-footer-meta">
+                Neural terminal · x402 · Stellar
+                {siteUrl ? (
+                  <>
+                    {" · "}
+                    <a href={siteUrl} className="home-footer-domain">
+                      lilagent.xyz
+                    </a>
+                  </>
+                ) : null}
+              </p>
             </div>
             <div className="home-footer-links">
               <Link to="/terminal">Terminal</Link>
@@ -490,7 +500,7 @@ export default function HomePage() {
                   X
                 </a>
               ) : null}
-              <a href="mailto:hello@example.com" className="home-nav-cta" style={{ display: "inline-block" }}>
+              <a href="mailto:hello@lilagent.xyz" className="home-nav-cta" style={{ display: "inline-block" }}>
                 Contact
               </a>
             </div>

@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  // GitHub Pages project site: https://<user>.github.io/<repo>/
+  // Production on https://lilagent.xyz/ uses base "/". GitHub Pages project sites: GITHUB_PAGES=true → /lila-website/
   base: process.env.GITHUB_PAGES === "true" ? "/lila-website/" : "/",
   plugins: [react()],
   server: {

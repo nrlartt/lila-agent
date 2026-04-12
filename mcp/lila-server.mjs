@@ -57,7 +57,9 @@ const server = new McpServer(
     instructions: [
       "LILA Neural Terminal on Stellar: paid AI (chat, analyze, code, research) via x402.",
       "Prerequisites: LILA HTTP server running; for real USDC payments set STELLAR_PAY_TO and STELLAR_AGENT_SECRET on the server.",
-      "Configure LILA_BASE_URL if the API is not on 127.0.0.1:" + PORT + ".",
+      "Production API: set LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" +
+        PORT +
+        " locally).",
       "Primary tool: lila_query(service, input) — routes through /api/agent/query.",
     ].join(" "),
   },

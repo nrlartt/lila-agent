@@ -880,6 +880,14 @@
   margin-top: 0.75rem;
 }
 
+.home-footer-domain {
+  color: #737373;
+  text-decoration: none;
+}
+.home-footer-domain:hover {
+  color: var(--home-cyan);
+}
+
 .home-footer-links {
   display: flex;
   flex-wrap: wrap;

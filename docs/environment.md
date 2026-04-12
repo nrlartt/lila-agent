@@ -18,7 +18,7 @@ Load order: `.env` at the repository root (see `server/index.js` and Vite for cl
 |----------|-------------|
 | `PORT` | HTTP port (default `3001`) |
 | `NODE_ENV` | `production` for static SPA + minified behavior |
-| `CORS_ORIGIN` | Comma-separated allowed browser origins in production |
+| `CORS_ORIGIN` | Comma-separated allowed browser origins in production (e.g. **`https://lilagent.xyz`**) |
 | `ENABLE_HSTS` | `true` only behind HTTPS termination |
 | `RATE_LIMIT_MAX_PER_MIN` | Caps premium POSTs per IP per minute |
 | `LILA_INTERNAL_BASE_URL` | Optional. Base URL the server uses when `/api/agent/query` pays premium routes (default `http://127.0.0.1:$PORT`). Set in Docker or when `localhost` is wrong. |
@@ -27,7 +27,7 @@ Load order: `.env` at the repository root (see `server/index.js` and Vite for cl
 
 | Variable | Description |
 |----------|-------------|
-| `LILA_PUBLIC_URL` | Public HTTPS base URL of the LILA API when deployed. Remote OpenClaw/other agents should set MCP `env.LILA_BASE_URL` to this value. |
+| `LILA_PUBLIC_URL` | Public HTTPS base URL (no trailing slash). Production: **`https://lilagent.xyz`**. Remote agents set MCP `env.LILA_BASE_URL` to this value. |
 | `LILA_BASE_URL` | Base URL for `npm run mcp` (stdio MCP) to reach `/api/services`, `/api/health`, `/api/agent/query` (default `http://127.0.0.1:$PORT`). |
 | `LILA_DOTENV_PATH` | Optional absolute path to `.env` if the MCP process is started with `cwd` outside the repo. |
 
@@ -49,6 +49,8 @@ Additional HTTP inference keys are read by the server if set; see `server/llm.js
 
 | Variable | Description |
 |----------|-------------|
+| `VITE_SITE_URL` | Public site origin for metadata/footer (default **`https://lilagent.xyz`** in `defaultSiteLinks.json`) |
+| `VITE_API_ORIGIN` | If the SPA is **not** same-origin as the API, set the API origin (no trailing slash). Same host as the app → leave unset. |
 | `VITE_UNICORNSTUDIO_PROJECT_ID` | Optional hero background project id (build-time) |
 | `VITE_GITHUB_URL` | Public GitHub repository URL (nav/footer links + default docs URL) |
 | `VITE_DOCS_URL` | Optional override for **Docs** menu link (default: `.../blob/main/docs/README.md` under `VITE_GITHUB_URL`) |

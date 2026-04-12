@@ -9,6 +9,7 @@
 [![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![Stellar](https://img.shields.io/badge/Stellar-Soroban-7C3AED?logo=stellar&logoColor=white)](https://stellar.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Live](https://img.shields.io/badge/live-lilagent.xyz-22c55e)](https://lilagent.xyz/)
 
 **[Architecture](#architecture)** · **[How it works](#how-it-works)** · **[Product surface](#product-surface)** · **[Security](#security)** · **[Deploy](#deploy)** · **[Docs](docs/README.md)** · **[Contributing](CONTRIBUTING.md)**
 
@@ -21,6 +22,8 @@
 Extended technical reference: **[docs/README.md](docs/README.md)** (architecture, API, environment, deployment, frontend).
 
 ## What LILA is
+
+**Production:** **[lilagent.xyz](https://lilagent.xyz/)** (SPA + API on the same origin when deployed as documented).
 
 **LILA** is a full-stack demo of **pay-per-request AI** on **Stellar**: a browser terminal plus REST API where each premium call is paid with **x402** (HTTP 402 + Soroban auth + USDC settlement), using **Freighter** in the browser. No subscription keys in the client for payments—users sign transfers from their own wallet.
 
