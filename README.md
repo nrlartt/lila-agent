@@ -83,6 +83,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 
 - [Node.js](https://nodejs.org/) 18+
 - [Freighter](https://www.freighter.app/) (for user-paid flows)
+- **VS Code / Cursor:** install the workspace-recommended **Dotenv** extension (`.vscode/extensions.json`) so `.env` uses key/value syntax colors.
 
 ### Install
 
