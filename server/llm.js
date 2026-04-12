@@ -1,6 +1,6 @@
 /**
  * LLM integration layer.
- * Priority: OpenClaw gateway (when configured), then optional HTTP chat backends, or static fallback.
+ * Priority: LLM_PROVIDER (groq|openclaw|openai|auto), or default OpenClaw → Groq → OpenAI → static.
  * Vendor names are not exposed to clients or public API responses.
  */
 
@@ -150,6 +150,57 @@ function ensureDeviceIdentity() {
   }
 }
 
+function tryGroq(config) {
+  const groqCandidate = (
+    process.env.GROQ_API_KEY ||
+    config.groqKey ||
+    ""
+  ).trim();
+  if (!groqCandidate) return false;
+  groqKey = groqCandidate;
+  const modelEnv = process.env.GROQ_MODEL;
+  const modelCfg = config.groqModel;
+  if (modelEnv && String(modelEnv).trim()) {
+    groqModel = String(modelEnv).trim();
+  } else if (modelCfg && String(modelCfg).trim()) {
+    groqModel = String(modelCfg).trim();
+  }
+  provider = "groq";
+  console.log("[LLM] Inference: Groq (HTTP)");
+  return true;
+}
+
+function tryOpenClaw(config) {
+  const url = config.openclawUrl || process.env.OPENCLAW_GATEWAY_URL;
+  if (!url) return false;
+  openclawUrl = url;
+  openclawToken = config.openclawToken || process.env.OPENCLAW_GATEWAY_TOKEN || null;
+  provider = "openclaw";
+  if (!openclawToken) {
+    ensureDeviceIdentity();
+  }
+  console.log("[LLM] Inference: OpenClaw gateway");
+  return true;
+}
+
+function tryOpenAI(config) {
+  const openaiCandidate = (
+    process.env.OPENAI_API_KEY ||
+    config.openaiKey ||
+    ""
+  ).trim();
+  if (!openaiCandidate) return false;
+  openaiKey = openaiCandidate;
+  provider = "openai";
+  console.log("[LLM] Inference: OpenAI (HTTP)");
+  return true;
+}
+
+/**
+ * Provider selection:
+ * - LLM_PROVIDER=groq | openclaw | openai — force that backend if keys/URL exist.
+ * - LLM_PROVIDER unset or auto — default order: OpenClaw (if OPENCLAW_GATEWAY_URL) → Groq → OpenAI → static.
+ */
 export function setupLLM(config = {}) {
   // Reload .env here so keys win over empty shell vars (dotenv default is no override).
   dotenv.config({
@@ -158,47 +209,28 @@ export function setupLLM(config = {}) {
     quiet: true,
   });
 
-  if (config.openclawUrl || process.env.OPENCLAW_GATEWAY_URL) {
-    openclawUrl = config.openclawUrl || process.env.OPENCLAW_GATEWAY_URL;
-    openclawToken = config.openclawToken || process.env.OPENCLAW_GATEWAY_TOKEN || null;
-    provider = "openclaw";
-    if (!openclawToken) {
-      ensureDeviceIdentity();
-    }
-    console.log("[LLM] Inference: gateway connected");
-    return;
+  const mode = (process.env.LLM_PROVIDER || "auto").trim().toLowerCase();
+
+  if (mode === "groq") {
+    if (tryGroq(config)) return;
+    console.warn(
+      "[LLM] LLM_PROVIDER=groq but GROQ_API_KEY missing — falling back to auto order",
+    );
+  } else if (mode === "openclaw") {
+    if (tryOpenClaw(config)) return;
+    console.warn(
+      "[LLM] LLM_PROVIDER=openclaw but OPENCLAW_GATEWAY_URL missing — falling back to auto order",
+    );
+  } else if (mode === "openai") {
+    if (tryOpenAI(config)) return;
+    console.warn(
+      "[LLM] LLM_PROVIDER=openai but OPENAI_API_KEY missing — falling back to auto order",
+    );
   }
 
-  const groqCandidate = (
-    process.env.GROQ_API_KEY ||
-    config.groqKey ||
-    ""
-  ).trim();
-  if (groqCandidate) {
-    groqKey = groqCandidate;
-    const modelEnv = process.env.GROQ_MODEL;
-    const modelCfg = config.groqModel;
-    if (modelEnv && String(modelEnv).trim()) {
-      groqModel = String(modelEnv).trim();
-    } else if (modelCfg && String(modelCfg).trim()) {
-      groqModel = String(modelCfg).trim();
-    }
-    provider = "groq";
-    console.log("[LLM] Inference: HTTP backend connected");
-    return;
-  }
-
-  const openaiCandidate = (
-    process.env.OPENAI_API_KEY ||
-    config.openaiKey ||
-    ""
-  ).trim();
-  if (openaiCandidate) {
-    openaiKey = openaiCandidate;
-    provider = "openai";
-    console.log("[LLM] Inference: HTTP backend connected");
-    return;
-  }
+  if (tryOpenClaw(config)) return;
+  if (tryGroq(config)) return;
+  if (tryOpenAI(config)) return;
   console.log("[LLM] Inference: static fallback (no remote LLM configured)");
 }
 

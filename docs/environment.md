@@ -37,7 +37,8 @@ See [OpenClaw & MCP](openclaw-mcp.md) and [Stellar agentic resources](stellar-ag
 
 | Variable | Description |
 |----------|-------------|
-| `OPENCLAW_GATEWAY_URL` | WebSocket URL for neural gateway (preferred when set) |
+| `LLM_PROVIDER` | `groq` \| `openclaw` \| `openai` \| `auto` (default). **`auto`** order: OpenClaw if `OPENCLAW_GATEWAY_URL` is set, else Groq, else OpenAI. Set **`groq`** to use Groq even when an OpenClaw URL is present. |
+| `OPENCLAW_GATEWAY_URL` | WebSocket URL for neural gateway (used before Groq when `LLM_PROVIDER` is `auto` or `openclaw`) |
 | `OPENCLAW_GATEWAY_TOKEN` | Optional bearer token |
 | `OPENCLAW_GATEWAY_SCOPES` | Optional comma-separated scopes |
 | `OPENCLAW_CONNECT_WITH_DEVICE` | Device-signed connect |
