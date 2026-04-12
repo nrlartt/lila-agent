@@ -3,7 +3,7 @@
 ## Stack
 
 - **React 18** + **Vite** (dev/build tooling)
-- **react-router-dom** — `BrowserRouter` with two routes
+- **react-router-dom** — `BrowserRouter` with routes including `/`, `/terminal`, `/docs`
 - Global styles: `src/styles.css` (terminal), `src/home.css` (landing)
 
 ## Routes
@@ -12,6 +12,7 @@
 |------|-----------|--------|
 | `/` | `HomePage` | Landing, hero, FAQ, links to terminal |
 | `/terminal` | `TerminalPage` | Thin nav + `Terminal` |
+| `/docs` | `DocsPage` | In-app technical documentation hub |
 
 ## Terminal
 

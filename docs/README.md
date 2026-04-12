@@ -1,5 +1,7 @@
 # LILA documentation
 
+**On the live site:** open **`/docs`** (e.g. [lilagent.xyz/docs](https://lilagent.xyz/docs)) for the in-app documentation page.
+
 Technical reference for operators and contributors. Product marketing copy lives in the root [README](../README.md).
 
 | Document | Description |

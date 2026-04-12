@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import UnicornStudioHero, { DEFAULT_UNICORN_PROJECT } from "../components/UnicornStudioHero.jsx";
-import { getSiteLinks } from "../lib/siteLinks.js";
+import { getSiteLinks, isExternalDocsUrl } from "../lib/siteLinks.js";
 import "../home.css";
 
 const UNICORN_PROJECT =
@@ -45,6 +45,7 @@ function IconX() {
 export default function HomePage() {
   const progressRef = useRef(null);
   const { siteUrl, docsUrl, githubUrl, xUrl } = getSiteLinks();
+  const docsExternal = isExternalDocsUrl(docsUrl);
   /** Hero is above the fold: IO can miss first paint — start hidden, then add in-view after layout (LAB-style kinetic). */
   const [heroReveal, setHeroReveal] = useState(false);
 
@@ -135,9 +136,15 @@ export default function HomePage() {
               <a href="#faq">FAQ</a>
             </div>
             {docsUrl ? (
-              <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="home-nav-docs">
-                Docs
-              </a>
+              docsExternal ? (
+                <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="home-nav-docs">
+                  Docs
+                </a>
+              ) : (
+                <Link to={docsUrl} className="home-nav-docs">
+                  Docs
+                </Link>
+              )
             ) : null}
             {(githubUrl || xUrl) && (
               <div className="home-nav-social" aria-label="Social links">
@@ -486,9 +493,13 @@ export default function HomePage() {
               <Link to="/terminal">Terminal</Link>
               <a href="#capabilities">Capabilities</a>
               {docsUrl ? (
-                <a href={docsUrl} target="_blank" rel="noopener noreferrer">
-                  Docs
-                </a>
+                docsExternal ? (
+                  <a href={docsUrl} target="_blank" rel="noopener noreferrer">
+                    Docs
+                  </a>
+                ) : (
+                  <Link to={docsUrl}>Docs</Link>
+                )
               ) : null}
               {githubUrl ? (
                 <a href={githubUrl} target="_blank" rel="noopener noreferrer">

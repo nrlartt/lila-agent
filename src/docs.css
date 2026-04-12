@@ -1,0 +1,188 @@
+/* In-app /docs — reference layout (Xona-style TOC + prose) */
+
+.docs-page {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.docs-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(13, 13, 20, 0.95);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.docs-page-header a {
+  color: var(--cyan);
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.docs-page-header a:hover {
+  text-decoration: underline;
+}
+
+.docs-page-header-title {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.docs-page-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+@media (max-width: 900px) {
+  .docs-page-layout {
+    grid-template-columns: 1fr;
+  }
+  .docs-toc {
+    position: static;
+  }
+}
+
+.docs-toc {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+.docs-toc-title {
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  font-size: 0.65rem;
+}
+
+.docs-toc ul {
+  list-style: none;
+}
+
+.docs-toc li {
+  margin-bottom: 0.5rem;
+}
+
+.docs-toc a {
+  color: var(--text);
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+.docs-toc a:hover {
+  color: var(--cyan);
+}
+
+.docs-content {
+  min-width: 0;
+}
+
+.docs-content h1 {
+  font-family: "Orbitron", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.06em;
+}
+
+.docs-content h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  margin: 2.25rem 0 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.docs-content h2:first-of-type {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.docs-content h3 {
+  font-size: 0.78rem;
+  color: var(--green);
+  margin: 1.25rem 0 0.5rem;
+  letter-spacing: 0.08em;
+}
+
+.docs-content p,
+.docs-content li {
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.docs-content ul {
+  margin: 0.5rem 0 1rem 1.25rem;
+}
+
+.docs-content a {
+  color: var(--cyan);
+}
+
+.docs-content pre {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.75rem 0 1rem;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.docs-content code {
+  font-family: var(--font-mono);
+  color: var(--yellow);
+}
+
+.docs-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.docs-content th,
+.docs-content td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+}
+
+.docs-content th {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.docs-note {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  border-left: 2px solid var(--purple);
+  padding-left: 0.75rem;
+  margin: 1rem 0;
+}

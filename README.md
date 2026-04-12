@@ -19,7 +19,7 @@
 
 ## Documentation
 
-Extended technical reference: **[docs/README.md](docs/README.md)** (architecture, API, environment, deployment, frontend).
+**In-app docs:** **[lilagent.xyz/docs](https://lilagent.xyz/docs)**. Extended Markdown reference: **[docs/README.md](docs/README.md)** (architecture, API, environment, deployment, frontend).
 
 ## What LILA is
 
@@ -76,6 +76,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 | `POST /api/agent/query` | Server agent pays with configured secret (if enabled). |
 | `npm run mcp` | MCP (stdio) for OpenClaw / Cursor / Claude Code — [docs/openclaw-mcp.md](docs/openclaw-mcp.md), example [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
 | SPA `/` | Marketing / lab-style landing (hero + sections). |
+| SPA `/docs` | Technical documentation (API, env, MCP, deployment). |
 | SPA `/terminal` | Full-height terminal UI. |
 
 ---
