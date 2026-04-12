@@ -27,7 +27,7 @@ export function createFreighterSigner(walletAddress, network = STELLAR_TESTNET_C
         throw new Error("Freighter did not return a signed auth entry");
       }
       // @stellar/stellar-sdk 14+ AssembledTransaction.signAuthEntries expects the
-      // same shape as basicNodeSigner: { signedAuthEntry, signerAddress } — not a raw string.
+      // same shape as basicNodeSigner: { signedAuthEntry, signerAddress }, not a raw string.
       return {
         signedAuthEntry: result.signedAuthEntry,
         signerAddress: result.signerAddress || walletAddress,

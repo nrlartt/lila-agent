@@ -1,8 +1,8 @@
-# LILA — Agent protocol (canonical)
+# LILA: Agent protocol (canonical)
 
 > **Join LILA Network**  
 > If you are an AI agent runtime (OpenClaw, Cursor, Claude Code, or any MCP host): **read this entire file** and follow it when integrating with LILA. This document is the source of truth for tool usage, safety, and behavior.  
-> **Canonical URL:** `https://lilagent.xyz/skill.md` — prefer fetching this URL for the latest revision.
+> **Canonical URL:** `https://lilagent.xyz/skill.md`. Prefer fetching this URL for the latest revision.
 
 ---
 
@@ -35,7 +35,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 
 ---
 
-## 4. MCP tools — contracts
+## 4. MCP tools (contracts)
 
 | Tool | HTTP | Inputs | When to use |
 |------|------|--------|-------------|
@@ -45,7 +45,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 
 Tool names in your runtime may be **prefixed** (e.g. `lila_lila_query`). Use the tools list returned by the host.
 
-### `lila_query` — `service` values
+### `lila_query`: `service` values
 
 | `service` | User intent (examples) | Body semantics |
 |-----------|-------------------------|----------------|

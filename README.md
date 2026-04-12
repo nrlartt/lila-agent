@@ -25,7 +25,7 @@
 
 **Production:** **[lilagent.xyz](https://lilagent.xyz/)** (SPA + API on the same origin when deployed as documented).
 
-**LILA** is a full-stack demo of **pay-per-request AI** on **Stellar**: a browser terminal plus REST API where each premium call is paid with **x402** (HTTP 402 + Soroban auth + USDC settlement), using **Freighter** in the browser. No subscription keys in the client for payments—users sign transfers from their own wallet.
+**LILA** is a full-stack demo of **pay-per-request AI** on **Stellar**: a browser terminal plus REST API where each premium call is paid with **x402** (HTTP 402 + Soroban auth + USDC settlement), using **Freighter** in the browser. No subscription keys in the client for payments: users sign transfers from their own wallet.
 
 The **landing page** is a separate route from the **terminal** (`/` vs `/terminal`). The server exposes public metadata (`/api/services`, `/api/health`) and **paid** routes under `/api/premium/*` protected by x402 middleware when `STELLAR_PAY_TO` is configured.
 
@@ -74,7 +74,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 | `GET /api/health` | Liveness: uptime; `llmReady` = remote inference available (boolean). |
 | `POST /api/premium/*` | Paid AI endpoints (chat, analyze, code, research). |
 | `POST /api/agent/query` | Server agent pays with configured secret (if enabled). |
-| `npm run mcp` | MCP (stdio) for OpenClaw / Cursor / Claude Code — [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [optional Skill](skills/lila-openclaw/SKILL.md), example [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
+| `npm run mcp` | MCP (stdio) for OpenClaw / Cursor / Claude Code. See [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [optional Skill](skills/lila-openclaw/SKILL.md), example [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
 | SPA `/` | Marketing / lab-style landing (hero + sections). |
 | SPA `/docs` | Technical documentation (API, env, MCP, deployment). |
 | SPA `/terminal` | Full-height terminal UI. |
@@ -143,7 +143,7 @@ Use **only this project directory** as the Git repository root (not your user ho
 cd lilagent
 git init
 git add .
-git commit -m "Initial commit: LILA — Neural Terminal"
+git commit -m "Initial commit: LILA Neural Terminal"
 git branch -M main
 git remote add origin https://github.com/nrlartt/lila-agent.git
 git push -u origin main
@@ -171,7 +171,7 @@ lilagent/
 
 ## For builders, demos, and hackathon-style submissions
 
-This README is structured for **fast evaluation**: clone, configure `.env`, run `npm run dev`, and trace **x402 + USDC on Stellar**. The **product UI** stays neutral (no event-specific labels)—context and talking points live here and in your live demo.
+This README is structured for **fast evaluation**: clone, configure `.env`, run `npm run dev`, and trace **x402 + USDC on Stellar**. The **product UI** stays neutral (no event-specific labels). Context and talking points live here and in your live demo.
 
 ---
 

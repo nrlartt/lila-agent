@@ -1,6 +1,6 @@
 # OpenClaw, Stellar x402, and LILA MCP
 
-This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server** that calls your HTTP API — especially **`POST /api/agent/query`**, which uses **`STELLAR_AGENT_SECRET`** to settle **x402** on Stellar when configured.
+This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server** that calls your HTTP API, especially **`POST /api/agent/query`**, which uses **`STELLAR_AGENT_SECRET`** to settle **x402** on Stellar when configured.
 
 **Production API origin:** **`https://lilagent.xyz`** (no path prefix). Other agents should use this as **`LILA_BASE_URL`** when calling the MCP-backed HTTP API.
 
@@ -9,7 +9,7 @@ For background on x402, MPP, and Stellar tooling, see [Stellar agentic resources
 ## What you need on the LILA side
 
 1. **LILA HTTP server** running (`npm run dev:server` or `npm start`).
-2. **Stellar**: `STELLAR_PAY_TO`, `STELLAR_AGENT_SECRET`, funded agent wallet (USDC + XLM for fees) on the chosen network — see [Environment](environment.md).
+2. **Stellar**: `STELLAR_PAY_TO`, `STELLAR_AGENT_SECRET`, funded agent wallet (USDC + XLM for fees) on the chosen network. See [Environment](environment.md).
 3. **Env on the server:** `LILA_PUBLIC_URL=https://lilagent.xyz` (and `CORS_ORIGIN` including `https://lilagent.xyz`).
 
 ## MCP server (stdio)
@@ -36,7 +36,7 @@ $env:LILA_BASE_URL = "https://lilagent.xyz"
 npm run mcp
 ```
 
-Optional: **`LILA_DOTENV_PATH`** — absolute path to `.env` if the MCP process is started with a working directory outside this repo.
+Optional: **`LILA_DOTENV_PATH`**: absolute path to `.env` if the MCP process is started with a working directory outside this repo.
 
 ## Register LILA in OpenClaw
 
@@ -55,8 +55,8 @@ OpenClaw stores outbound MCP definitions under **`mcp.servers`** in `~/.openclaw
 
 Copy and merge **`config/openclaw-lila.mcp.example.json`** into your OpenClaw config. Set:
 
-- **`cwd`** — absolute path to this repo on your machine.
-- **`env.LILA_BASE_URL`** — **`https://lilagent.xyz`** when the agent should use the live deployment.
+- **`cwd`**: absolute path to this repo on your machine.
+- **`env.LILA_BASE_URL`**: **`https://lilagent.xyz`** when the agent should use the live deployment.
 
 ### CLI (alternative)
 
@@ -72,7 +72,19 @@ openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/
 
 Use your OS path format; restart the OpenClaw gateway after changes.
 
-## MCP vs Skill — do agents need a Skill?
+### Automated bootstrap (same machine as the repo)
+
+After `npm install`, from the repository root:
+
+```bash
+npm run openclaw:bootstrap
+```
+
+This copies **`skills/lila-openclaw`** to **`~/.openclaw/skills/lila-openclaw`** (override with **`OPENCLAW_HOME`**) and prints a ready-to-paste **`openclaw mcp set lila`** command with **`cwd`** pointing at this repo and **`LILA_BASE_URL`** defaulting to **`https://lilagent.xyz`**. Use **`--base-url=https://...`** or **`LILA_BASE_URL`** to change the API origin.
+
+**x402:** **`STELLAR_PAY_TO`** and **`STELLAR_AGENT_SECRET`** belong on the **LILA HTTP server** environment (e.g. Railway), not on the OpenClaw MCP client. The MCP process only calls your public API; settlement uses the server’s agent wallet when those vars are set on the API.
+
+## MCP vs Skill: do agents need a Skill?
 
 | Layer | Required? | Role |
 |-------|-----------|------|

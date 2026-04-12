@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   LILA NEURAL TERMINAL — Cyberpunk Theme
+   LILA NEURAL TERMINAL | Cyberpunk Theme
    ═══════════════════════════════════════════════════ */
 
 :root {
@@ -48,6 +48,7 @@ body,
 
 .terminal-page {
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -121,6 +122,7 @@ body::after {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   width: 100%;
   cursor: text;
   position: relative;
@@ -422,7 +424,7 @@ body::after {
 @media (max-width: 768px) {
   .status-bar {
     font-size: 9px;
-    padding: 6px 10px;
+    padding: 6px max(10px, env(safe-area-inset-left, 0px)) 6px max(10px, env(safe-area-inset-right, 0px));
   }
 
   .status-right {
@@ -430,7 +432,8 @@ body::after {
   }
 
   .terminal-body {
-    padding: 12px 10px;
+    padding: 12px max(10px, env(safe-area-inset-left, 0px)) 12px max(10px, env(safe-area-inset-right, 0px));
+    padding-bottom: max(100px, calc(100px + env(safe-area-inset-bottom, 0px)));
   }
 
   .terminal-line {
@@ -443,5 +446,15 @@ body::after {
 
   .bottom-bar {
     font-size: 8px;
+    padding: 6px max(16px, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  .terminal-input {
+    font-size: 16px;
+  }
+
+  .input-line {
+    font-size: 16px;
   }
 }

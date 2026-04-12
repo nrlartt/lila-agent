@@ -77,12 +77,22 @@ app.use((req, res, next) => {
   next();
 });
 
+const distDir = path.join(__dirname, "../dist");
+const skillMdPath = path.join(distDir, "skill.md");
+
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../dist")));
+  /** Explicit route so /skill.md is never mistaken for SPA; correct Content-Type for agents. */
+  app.get("/skill.md", (_req, res, next) => {
+    res.type("text/markdown; charset=utf-8");
+    res.sendFile(skillMdPath, (err) => {
+      if (err) next(err);
+    });
+  });
+  app.use(express.static(distDir));
 }
 
 // ──────────────────────────────────────────────
-//  x402 MIDDLEWARE — must be registered BEFORE premium routes
+//  x402 MIDDLEWARE (must be registered BEFORE premium routes)
 // ──────────────────────────────────────────────
 
 let x402Active = false;
@@ -99,7 +109,7 @@ app.use((req, res, next) => {
 
 async function setupX402Server() {
   if (!PAY_TO) {
-    console.warn("[SERVER] STELLAR_PAY_TO not set — x402 middleware disabled");
+    console.warn("[SERVER] STELLAR_PAY_TO not set; x402 middleware disabled");
     return;
   }
   try {
@@ -149,7 +159,7 @@ async function setupX402Server() {
     );
 
     x402Active = true;
-    console.log("[SERVER] x402 middleware active — premium endpoints protected");
+    console.log("[SERVER] x402 middleware active; premium endpoints protected");
   } catch (err) {
     console.warn("[SERVER] x402 middleware setup failed:", err.message);
   }
@@ -194,7 +204,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // ──────────────────────────────────────────────
-//  AGENT ENDPOINT — routes queries through x402
+//  AGENT ENDPOINT (routes queries through x402)
 // ──────────────────────────────────────────────
 
 const BODY_KEY_MAP = { chat: "message", analyze: "query", code: "prompt", research: "topic" };
@@ -318,10 +328,10 @@ function generateResponse(service, input) {
     if (q.includes("x402"))
       return `x402 is a pay-per-request HTTP payment protocol. When a client hits a paywalled endpoint, the server responds with HTTP 402 and payment requirements. The client signs a Soroban auth entry authorizing USDC transfer, retries with payment headers, and the facilitator settles on Stellar. Micropayments as small as $0.001 per call.`;
     if (q.includes("agent"))
-      return `AI agents are autonomous software entities that reason, plan, and act. With x402 on Stellar, agents gain economic agency — paying for API calls, purchasing data, hiring other agents, and monetizing services. LILA demonstrates this via paid AI services settled through Stellar micropayments.`;
+      return `AI agents are autonomous software entities that reason, plan, and act. With x402 on Stellar, agents gain economic agency: paying for API calls, purchasing data, hiring other agents, and monetizing services. LILA demonstrates this via paid AI services settled through Stellar micropayments.`;
     if (q.includes("lila") || q.includes("who"))
-      return `I am LILA — a Neural Terminal AI Agent on the Stellar network. I provide paid AI services through x402 micropayments: chat, market analysis, code generation, and deep research. Each query costs fractions of a cent in USDC, settled instantly on Stellar.`;
-    return `[Neural Core] Processing: "${input}"\n\nI've analyzed your request. As an autonomous AI agent on Stellar, I handle market analysis, code generation, research, and conversation — each paid via x402 micropayments.\n\nTry: Stellar, x402, AI agents, smart contracts.`;
+      return `I am LILA, a Neural Terminal AI Agent on the Stellar network. I provide paid AI services through x402 micropayments: chat, market analysis, code generation, and deep research. Each query costs fractions of a cent in USDC, settled instantly on Stellar.`;
+    return `[Neural Core] Processing: "${input}"\n\nI've analyzed your request. As an autonomous AI agent on Stellar, I handle market analysis, code generation, research, and conversation; each is paid via x402 micropayments.\n\nTry: Stellar, x402, AI agents, smart contracts.`;
   }
 
   if (service === "analyze") {

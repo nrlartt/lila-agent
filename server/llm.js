@@ -21,17 +21,17 @@ let openaiKey = null;
 let openclawUrl = null;
 let openclawToken = null;
 
-const LILA_SYSTEM_PROMPT = `You are LILA — a Neural Terminal AI Agent on the Stellar network.
+const LILA_SYSTEM_PROMPT = `You are LILA, a Neural Terminal AI Agent on the Stellar network.
 You deliver paid services via x402 (USDC): chat, market analysis, code, research.
 Tone: concise, technical, terminal-friendly. Use ASCII sections where it helps readability.
-Domain strengths: Stellar, Soroban, x402, DeFi, agentic systems — but only when relevant to the user's ask.`;
+Domain strengths: Stellar, Soroban, x402, DeFi, agentic systems, but only when relevant to the user's ask.`;
 
 /** Applies to every reply (all services, all providers). */
 const LILA_GROUNDING_POLICY = `
 ## Grounding and relevance (mandatory)
 - Do not invent specific prices, volumes, statistics, dates, version numbers, people, URLs, or "live" figures unless they appear explicitly in this conversation (e.g. a [LIVE DATA] block).
-- Stay on topic: answer what was asked. If the request is vague, state one short assumption or ask one clarifying question — do not fill pages of unrelated content.
-- Separate clearly: (1) facts you can justify from general knowledge, (2) interpretation, (3) speculation — label the last two.
+- Stay on topic: answer what was asked. If the request is vague, state one short assumption or ask one clarifying question. Do not fill pages of unrelated content.
+- Separate clearly: (1) facts you can justify from general knowledge, (2) interpretation, (3) speculation; label the last two.
 - Never imply you executed trades, accessed private systems, or browsed the web unless the prompt proves it.
 - No personalized financial, legal, or medical advice; informational framing only, with "verify independently" where numbers matter.
 - If you cannot answer safely, say what is missing and what the user should check instead of guessing.
@@ -198,8 +198,8 @@ function tryOpenAI(config) {
 
 /**
  * Provider selection:
- * - LLM_PROVIDER=groq | openclaw | openai — force that backend if keys/URL exist.
- * - LLM_PROVIDER unset or auto — default order: OpenClaw (if OPENCLAW_GATEWAY_URL) → Groq → OpenAI → static.
+ * - LLM_PROVIDER=groq | openclaw | openai: force that backend if keys/URL exist.
+ * - LLM_PROVIDER unset or auto: default order: OpenClaw (if OPENCLAW_GATEWAY_URL) → Groq → OpenAI → static.
  */
 export function setupLLM(config = {}) {
   // Reload .env here so keys win over empty shell vars (dotenv default is no override).
@@ -214,17 +214,17 @@ export function setupLLM(config = {}) {
   if (mode === "groq") {
     if (tryGroq(config)) return;
     console.warn(
-      "[LLM] LLM_PROVIDER=groq but GROQ_API_KEY missing — falling back to auto order",
+      "[LLM] LLM_PROVIDER=groq but GROQ_API_KEY missing; falling back to auto order",
     );
   } else if (mode === "openclaw") {
     if (tryOpenClaw(config)) return;
     console.warn(
-      "[LLM] LLM_PROVIDER=openclaw but OPENCLAW_GATEWAY_URL missing — falling back to auto order",
+      "[LLM] LLM_PROVIDER=openclaw but OPENCLAW_GATEWAY_URL missing; falling back to auto order",
     );
   } else if (mode === "openai") {
     if (tryOpenAI(config)) return;
     console.warn(
-      "[LLM] LLM_PROVIDER=openai but OPENAI_API_KEY missing — falling back to auto order",
+      "[LLM] LLM_PROVIDER=openai but OPENAI_API_KEY missing; falling back to auto order",
     );
   }
 
@@ -256,7 +256,7 @@ Reply directly to this. If they ask for real-time or private data you do not hav
 
 User request: "${input}"
 
-Write a concise analysis with ASCII section headers. Obey [STRICT RULES] in any LIVE DATA block; never contradict injected numbers. If no live block exists, do not invent market figures — thematic / educational only.`,
+Write a concise analysis with ASCII section headers. Obey [STRICT RULES] in any LIVE DATA block; never contradict injected numbers. If no live block exists, do not invent market figures (thematic / educational only).`,
     code: `Requirement: "${input}"
 
 Output a Soroban (Rust) contract or Stellar-related code. Use real stellar-sdk / soroban-sdk patterns. Comment uncertain API details; do not invent crate methods or opcodes.`,
@@ -456,7 +456,7 @@ function attemptOpenClaw(prompt, useDeviceAuth) {
         `[LLM] Handshake complete (protocol ${proto})${granted ? ` scopes=${JSON.stringify(granted)}` : ""}`,
       );
 
-      // chat.send alone — subscribe can fail with same missing-scope if token session is narrow
+      // chat.send alone: subscribe can fail with same missing-scope if token session is narrow
       sendReq("chat.send", {
         sessionKey,
         message: prompt,
@@ -522,7 +522,7 @@ function attemptOpenClaw(prompt, useDeviceAuth) {
               process.env.OPENCLAW_DEVICE_AUTH_FALLBACK === "true";
             if (canRetryDevice) {
               console.warn(
-                "[LLM] Token-only handshake failed — retrying with device auth (OPENCLAW_DEVICE_AUTH_FALLBACK)",
+                "[LLM] Token-only handshake failed; retrying with device auth (OPENCLAW_DEVICE_AUTH_FALLBACK)",
               );
               resolved = true;
               clearTimeout(timer);

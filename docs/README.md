@@ -12,11 +12,11 @@ Technical reference for operators and contributors. Product marketing copy lives
 | [Deployment](deployment.md) | Production build, HTTPS, CORS, process model |
 | [Frontend](frontend.md) | Routes, terminal, wallet client |
 | [OpenClaw & MCP](openclaw-mcp.md) | MCP stdio server + OpenClaw `mcp.servers` registration |
-| [OpenClaw skill (optional)](../skills/lila-openclaw/SKILL.md) | `SKILL.md` — when to use LILA tools (install under `~/.openclaw/skills/`) |
+| [OpenClaw skill (optional)](../skills/lila-openclaw/SKILL.md) | `SKILL.md`: when to use LILA tools (install under `~/.openclaw/skills/`) |
 | [Stellar agentic resources](stellar-agentic-resources.md) | x402, MPP, OpenClaw, wallets, external MCP links |
 
 ## Quick links
 
-- **Run locally:** root README — `npm run dev`
+- **Run locally:** root README, then `npm run dev`
 - **Security policy:** [SECURITY.md](../SECURITY.md)
 - **Contributing:** [CONTRIBUTING.md](../CONTRIBUTING.md)

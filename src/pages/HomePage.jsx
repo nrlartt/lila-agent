@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import UnicornStudioHero, { DEFAULT_UNICORN_PROJECT } from "../components/UnicornStudioHero.jsx";
 import { getSiteLinks, isExternalDocsUrl } from "../lib/siteLinks.js";
@@ -10,8 +10,8 @@ const UNICORN_PROJECT =
     ? import.meta.env.VITE_UNICORNSTUDIO_PROJECT_ID.trim()
     : DEFAULT_UNICORN_PROJECT;
 
-/** Canonical public skill URL — hero copy, clipboard, and Open link. */
-const SKILL_DOC_PUBLIC_URL = "https://www.lilagent.xyz/skill.md";
+/** Canonical public skill URL (apex, same origin as API/docs). www may not serve static files. */
+const SKILL_DOC_PUBLIC_URL = "https://lilagent.xyz/skill.md";
 
 function IconArrow() {
   return (
@@ -45,6 +45,22 @@ function IconX() {
   );
 }
 
+function IconMenu() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconCloseNav() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function IconCopy() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
@@ -59,9 +75,12 @@ export default function HomePage() {
   const { siteUrl, docsUrl, githubUrl, xUrl } = getSiteLinks();
   const docsExternal = isExternalDocsUrl(docsUrl);
   const skillHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/skill.md` : "/skill.md";
-  /** Hero is above the fold: IO can miss first paint — start hidden, then add in-view after layout (LAB-style kinetic). */
+  /** Hero is above the fold: IO can miss first paint; start hidden, then add in-view after layout (LAB-style kinetic). */
   const [heroReveal, setHeroReveal] = useState(false);
   const [skillCopyDone, setSkillCopyDone] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const navMenuId = useId();
+  const closeMobileNav = () => setNavOpen(false);
 
   const skillCopyLine = `Read ${SKILL_DOC_PUBLIC_URL} and follow the instructions to join Lila`;
 
@@ -89,6 +108,19 @@ export default function HomePage() {
       }
     }
   };
+
+  useEffect(() => {
+    if (!navOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") setNavOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [navOpen]);
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -166,56 +198,156 @@ export default function HomePage() {
 
       <nav className="home-nav" aria-label="Primary">
         <div className="home-nav-inner">
-          <a href="#home" className="home-brand">
-            <span className="home-brand-dot" aria-hidden />
-            <span className="home-brand-text">LILA // SYSTEM</span>
+          <a href="#home" className="home-brand" onClick={closeMobileNav}>
+            <img src="/lila-logo.png" alt="" className="home-brand-logo" width={72} height={72} decoding="async" />
+            <span className="home-brand-text">
+              <span className="home-brand-text-main">LILA</span>
+              <span className="home-brand-text-sub"> // SYSTEM</span>
+            </span>
           </a>
-          <div className="home-nav-center">
-            <div className="home-nav-links">
-              <a href="#capabilities">Capabilities</a>
-              <a href="#flow">Flow</a>
-              <a href="#faq">FAQ</a>
+          <div className="home-nav-right">
+            <div className="home-nav-desktop">
+              <div className="home-nav-center">
+                <div className="home-nav-links">
+                  <a href="#capabilities">Capabilities</a>
+                  <a href="#flow">Flow</a>
+                  <a href="#faq">FAQ</a>
+                </div>
+                {docsUrl ? (
+                  docsExternal ? (
+                    <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="home-nav-docs">
+                      Docs
+                    </a>
+                  ) : (
+                    <Link to={docsUrl} className="home-nav-docs">
+                      Docs
+                    </Link>
+                  )
+                ) : null}
+                <a href={skillHref} className="home-nav-docs" title="Canonical agent protocol (skill.md)">
+                  Agent protocol
+                </a>
+                {(githubUrl || xUrl) && (
+                  <div className="home-nav-social" aria-label="Social links">
+                    {githubUrl ? (
+                      <a
+                        href={githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="home-nav-icon-link"
+                        aria-label="GitHub repository"
+                      >
+                        <IconGitHub />
+                      </a>
+                    ) : null}
+                    {xUrl ? (
+                      <a href={xUrl} target="_blank" rel="noopener noreferrer" className="home-nav-icon-link" aria-label="X (Twitter)">
+                        <IconX />
+                      </a>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+              <Link to="/terminal" className="home-nav-cta">
+                Open_Terminal
+              </Link>
             </div>
+            <div className="home-nav-mobile-bar">
+              <Link to="/terminal" className="home-nav-cta home-nav-cta--compact" onClick={closeMobileNav}>
+                Terminal
+              </Link>
+              <button
+                type="button"
+                className={`home-nav-menu-btn${navOpen ? " is-open" : ""}`}
+                aria-expanded={navOpen}
+                aria-controls={navMenuId}
+                aria-label={navOpen ? "Close menu" : "Open menu"}
+                onClick={() => setNavOpen((v) => !v)}
+              >
+                {navOpen ? <IconCloseNav /> : <IconMenu />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div
+        id={navMenuId}
+        className={`home-nav-overlay${navOpen ? " is-open" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site navigation"
+        aria-hidden={!navOpen}
+      >
+        <div className="home-nav-overlay-backdrop" onClick={closeMobileNav} aria-hidden />
+        <div className="home-nav-overlay-panel">
+          <button type="button" className="home-nav-overlay-close" onClick={closeMobileNav} aria-label="Close menu">
+            <IconCloseNav />
+          </button>
+          <div className="home-nav-overlay-links">
+            <a href="#capabilities" className="home-nav-overlay-link" onClick={closeMobileNav}>
+              Capabilities
+            </a>
+            <a href="#flow" className="home-nav-overlay-link" onClick={closeMobileNav}>
+              Flow
+            </a>
+            <a href="#faq" className="home-nav-overlay-link" onClick={closeMobileNav}>
+              FAQ
+            </a>
             {docsUrl ? (
               docsExternal ? (
-                <a href={docsUrl} target="_blank" rel="noopener noreferrer" className="home-nav-docs">
+                <a
+                  href={docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="home-nav-overlay-link"
+                  onClick={closeMobileNav}
+                >
                   Docs
                 </a>
               ) : (
-                <Link to={docsUrl} className="home-nav-docs">
+                <Link to={docsUrl} className="home-nav-overlay-link" onClick={closeMobileNav}>
                   Docs
                 </Link>
               )
             ) : null}
-            <a href={skillHref} className="home-nav-docs" title="Canonical agent protocol (skill.md)">
+            <a href={skillHref} className="home-nav-overlay-link" onClick={closeMobileNav}>
               Agent protocol
             </a>
-            {(githubUrl || xUrl) && (
-              <div className="home-nav-social" aria-label="Social links">
-                {githubUrl ? (
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="home-nav-icon-link"
-                    aria-label="GitHub repository"
-                  >
-                    <IconGitHub />
-                  </a>
-                ) : null}
-                {xUrl ? (
-                  <a href={xUrl} target="_blank" rel="noopener noreferrer" className="home-nav-icon-link" aria-label="X (Twitter)">
-                    <IconX />
-                  </a>
-                ) : null}
-              </div>
-            )}
+            <Link to="/terminal" className="home-nav-overlay-link home-nav-overlay-link--accent" onClick={closeMobileNav}>
+              Open terminal
+            </Link>
           </div>
-          <Link to="/terminal" className="home-nav-cta">
-            Open_Terminal
-          </Link>
+          {(githubUrl || xUrl) && (
+            <div className="home-nav-overlay-social" aria-label="Social links">
+              {githubUrl ? (
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="home-nav-overlay-social-link"
+                  aria-label="GitHub repository"
+                  onClick={closeMobileNav}
+                >
+                  <IconGitHub />
+                </a>
+              ) : null}
+              {xUrl ? (
+                <a
+                  href={xUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="home-nav-overlay-social-link"
+                  aria-label="X (Twitter)"
+                  onClick={closeMobileNav}
+                >
+                  <IconX />
+                </a>
+              ) : null}
+            </div>
+          )}
         </div>
-      </nav>
+      </div>
 
       <main className="home-main">
         <section id="home" className="home-hero" aria-labelledby="home-heading">
@@ -230,13 +362,14 @@ export default function HomePage() {
                 <span className="home-eyebrow-line" />
               </div>
               <h1 id="home-heading" className={`kinetic-heading${heroReveal ? " in-view" : ""}`}>
-                Pay-per-request AI
+                Pay-per-request AI on Stellar,
                 <br />
-                <span className="home-gradient-text">on Stellar, settled in USDC.</span>
+                <span className="home-gradient-text">settled in USDC per call.</span>
               </h1>
               <p className="home-hero-lead">
-                LILA runs chat, analysis, code, and research behind HTTP APIs. Connect Freighter, approve x402
-                micropayments, and keep keys in your wallet — not in the browser bundle.
+                LILA delivers chat, analysis, code, and research over production HTTP APIs, with each request priced and
+                settled on Stellar. You authorize x402 micropayments in Freighter. Signing keys remain in your wallet;
+                nothing sensitive ships in the client bundle.
               </p>
               <div className="home-cta-row">
                 <Link to="/terminal" className="home-btn-primary">
@@ -318,8 +451,8 @@ export default function HomePage() {
                   </div>
                   <h3>x402 micropayments</h3>
                   <p>
-                    HTTP 402 challenges, user-signed settlement, and per-request pricing in USDC — aligned with
-                    the x402 flow on Stellar.
+                    HTTP 402 challenges, user-signed settlement, and per-request pricing in USDC, matching the x402
+                    flow on Stellar.
                   </p>
                 </div>
                 <p className="home-card-meta">Per-call billing</p>
@@ -365,7 +498,7 @@ export default function HomePage() {
                   </div>
                   <h3>Grounded analysis</h3>
                   <p>
-                    When a market symbol is present, analysis can pull live public quotes — no fabricated tickers or
+                    When a market symbol is present, analysis can pull live public quotes. No fabricated tickers or
                     stale demo numbers.
                   </p>
                 </div>
@@ -416,7 +549,7 @@ export default function HomePage() {
                 <p className="home-kicker">03 // Signals</p>
                 <h2 id="proof-heading">Operational signals</h2>
               </div>
-              <p>Qualitative targets — tune in production with your own SLOs.</p>
+              <p>Qualitative targets. Tune them in production with your own SLOs.</p>
             </div>
             <div className="home-stats reveal-on-scroll" style={{ "--reveal-delay": "80ms" }}>
               <div className="home-stat">
@@ -454,7 +587,7 @@ export default function HomePage() {
                 <div className="home-faq-item">
                   <dt>Do I need a wallet?</dt>
                   <dd>
-                    Yes — for paid commands you need the Freighter extension (or a compatible Stellar wallet flow your
+                    Yes. For paid commands you need the Freighter extension (or a compatible Stellar wallet flow your
                     deployment supports). You sign x402 payment payloads from your own address; the app never holds your
                     secret keys.
                   </dd>
@@ -514,7 +647,7 @@ export default function HomePage() {
                 <div className="home-faq-item">
                   <dt>How do I run the terminal on its own page?</dt>
                   <dd>
-                    Open the <Link to="/terminal">/terminal</Link> route — full-height console without the marketing
+                    Open the <Link to="/terminal">/terminal</Link> route for a full-height console without the marketing
                     sections.
                   </dd>
                 </div>
@@ -528,7 +661,7 @@ export default function HomePage() {
                 <div className="home-faq-item">
                   <dt>Can I self-host the API?</dt>
                   <dd>
-                    Yes — build the client, run the Node server with your env file, put HTTPS in front, and set CORS to
+                    Yes. Build the client, run the Node server with your env file, put HTTPS in front, and set CORS to
                     your site origin in production. See the repository README for deploy steps.
                   </dd>
                 </div>
@@ -548,7 +681,7 @@ export default function HomePage() {
           <div className="home-footer-inner">
             <div>
               <div className="home-footer-brand">
-                <span className="home-brand-dot" aria-hidden />
+                <img src="/lila-logo.png" alt="" className="home-brand-logo" width={72} height={72} decoding="async" />
                 <span className="home-brand-text">LILA // SYSTEM</span>
               </div>
               <p className="home-footer-meta">

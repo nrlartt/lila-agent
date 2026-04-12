@@ -26,7 +26,7 @@ console.log("Gateway URL:", url.replace(/^(wss?:\/\/)[^/]+/i, "$1<host>"));
 try {
   const text = await generateAIResponse("chat", "Reply with exactly: OK");
   if (text && String(text).trim()) {
-    console.log("OK — reply length:", String(text).length);
+    console.log("OK. Reply length:", String(text).length);
     console.log("Preview:", String(text).slice(0, 200).replace(/\n/g, " "));
     process.exit(0);
   }

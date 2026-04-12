@@ -3,7 +3,7 @@ let agentAddress = null;
 
 export async function setupAgentClient(secretKey, network, rpcUrl) {
   if (!secretKey) {
-    console.warn("[AGENT] No STELLAR_AGENT_SECRET — agent payments disabled");
+    console.warn("[AGENT] No STELLAR_AGENT_SECRET; agent payments disabled");
     return false;
   }
 
@@ -62,7 +62,7 @@ export async function payForService(url, options = {}) {
     return { paid: false, status: firstTry.status, data, txHash: null };
   }
 
-  console.log("[AGENT] Received 402 — creating payment...");
+  console.log("[AGENT] Received 402; creating payment...");
 
   // Step 2: Parse payment requirements from 402 response
   const paymentRequired = httpClient.getPaymentRequiredResponse((name) =>

@@ -40,7 +40,7 @@ export default function DocsPage() {
         </nav>
 
         <article className="docs-content">
-          <h1>LILA — technical documentation</h1>
+          <h1>LILA technical documentation</h1>
           <p className="docs-note">
             Operator reference for the neural terminal, REST API, x402 on Stellar, and MCP integration. Product
             marketing copy lives on the{" "}
@@ -69,7 +69,7 @@ export default function DocsPage() {
             LILA is a full-stack app: React SPA (landing <code>/</code>, terminal <code>/terminal</code>, this hub{" "}
             <code>/docs</code>) and an Express server for <code>/api/*</code>. Premium AI routes use x402 (HTTP 402 +
             Soroban + USDC) when <code>STELLAR_PAY_TO</code> is configured. Remote LLM inference can use OpenClaw
-            gateway, Groq, or OpenAI — see <code>LLM_PROVIDER</code> in Environment.
+            gateway, Groq, or OpenAI. See <code>LLM_PROVIDER</code> in Environment.
           </p>
 
           <h2 id="agent-protocol">Agent protocol</h2>
@@ -104,10 +104,10 @@ export default function DocsPage() {
           <h3>Public</h3>
           <ul>
             <li>
-              <code>GET /api/services</code> — metadata, prices, <code>x402Server</code>, <code>llmReady</code>
+              <code>GET /api/services</code>: metadata, prices, <code>x402Server</code>, <code>llmReady</code>
             </li>
             <li>
-              <code>GET /api/health</code> — liveness
+              <code>GET /api/health</code>: liveness
             </li>
           </ul>
 
@@ -146,7 +146,7 @@ export default function DocsPage() {
 
           <h3>Agent (optional)</h3>
           <p>
-            <code>POST /api/agent/query</code> with <code>{`{ "service", "input" }`}</code> — server pays premium
+            <code>POST /api/agent/query</code> with <code>{`{ "service", "input" }`}</code>. The server pays premium
             routes using <code>STELLAR_AGENT_SECRET</code> when x402 and agent wallet are configured. Intended for
             trusted backends and MCP bridges; add your own edge auth if you expose it publicly.
           </p>
@@ -174,7 +174,7 @@ export default function DocsPage() {
             Run <code>npm run mcp</code> for a stdio MCP server. Tools: <code>lila_services</code>,{" "}
             <code>lila_health</code>, <code>lila_query</code> (calls <code>POST /api/agent/query</code>). Set{" "}
             <code>LILA_BASE_URL</code> to your public API (e.g. <code>https://lilagent.xyz</code>) in OpenClaw{" "}
-            <code>mcp.servers</code> config — see <code>config/openclaw-lila.mcp.example.json</code> and{" "}
+            <code>mcp.servers</code> config. See <code>config/openclaw-lila.mcp.example.json</code> and{" "}
             <a href="https://docs.openclaw.ai/cli/mcp" target="_blank" rel="noopener noreferrer">
               OpenClaw MCP CLI
             </a>

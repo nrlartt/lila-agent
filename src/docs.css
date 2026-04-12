@@ -1,4 +1,4 @@
-/* In-app /docs — reference layout (Xona-style TOC + prose) */
+/* In-app /docs. Reference layout (Xona-style TOC + prose) */
 
 .docs-page {
   min-height: 100%;
@@ -13,7 +13,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(1.5rem, env(safe-area-inset-right, 0px)) 1rem
+    max(1.5rem, env(safe-area-inset-left, 0px));
   border-bottom: 1px solid var(--border);
   background: rgba(13, 13, 20, 0.95);
   position: sticky;
@@ -47,7 +48,10 @@
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2rem max(1.5rem, env(safe-area-inset-left, 0px)) calc(4rem + env(safe-area-inset-bottom, 0px))
+    max(1.5rem, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 @media (max-width: 900px) {
@@ -94,6 +98,8 @@
 
 .docs-content {
   min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .docs-content h1 {

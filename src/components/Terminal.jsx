@@ -22,7 +22,7 @@ const BOOT_LINES = [
   { text: "", delay: 100 },
 ];
 
-const WELCOME_TEXT = `Welcome, Operator. I am LILA — your autonomous AI agent on Stellar.
+const WELCOME_TEXT = `Welcome, Operator. I am LILA, your autonomous AI agent on Stellar.
 
 I offer paid AI services via x402 micropayments:
   /chat <msg>       Neural conversation         $0.001 USDC
@@ -77,7 +77,7 @@ export default function Terminal() {
         const data = await res.json();
         setServerInfo(data);
         if (data.x402Server) {
-          addLine("▸ x402: ENABLED — pay per request from your Freighter wallet (USDC)", "success");
+          addLine("▸ x402: ENABLED. Pay per request from your Freighter wallet (USDC)", "success");
         } else {
           addLine("▸ x402: unavailable in this deployment (demo / offline payments)", "warn");
         }
@@ -180,7 +180,7 @@ export default function Terminal() {
       case "services": {
         addLine("", "output");
         addLine("╔══════════════════════════════════════════════════════╗", "accent");
-        addLine("║          LILA SERVICE CATALOG — x402 Powered         ║", "accent");
+        addLine("║          LILA SERVICE CATALOG | x402 Powered         ║", "accent");
         addLine("╚══════════════════════════════════════════════════════╝", "accent");
         addLine("", "output");
         const svcList = serverInfo?.services || [];
@@ -302,7 +302,7 @@ export default function Terminal() {
         }
         addLine(`[x402] Cost: $${price} USDC`, "payment");
       } else {
-        addLine(`[x402] ○ Demo mode — no on-chain payment`, "warn");
+        addLine(`[x402] ○ Demo mode. No on-chain payment`, "warn");
         addLine(`[x402] Simulated cost: $${price} USDC`, "dim");
       }
 

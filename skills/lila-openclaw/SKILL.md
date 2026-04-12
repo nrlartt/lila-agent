@@ -1,6 +1,6 @@
 ---
 name: lila-openclaw
-description: LILA neural terminal — Stellar x402, MCP tools (lila_services, lila_health, lila_query), OpenClaw pairing. Use when the user works with LILA, lilagent.xyz, or OpenClaw + LILA.
+description: LILA neural terminal, Stellar x402, MCP tools (lila_services, lila_health, lila_query), OpenClaw pairing. Use when the user works with LILA, lilagent.xyz, or OpenClaw + LILA.
 ---
 
 # LILA + OpenClaw
@@ -13,9 +13,9 @@ That URL is the **full** specification: when to activate, MCP tool contracts, `l
 
 | Tool | Role |
 |------|------|
-| `lila_services` | `GET /api/services` — prices, `network`, `llmReady`, x402 flags |
-| `lila_health` | `GET /api/health` — liveness |
-| `lila_query` | `POST /api/agent/query` — body `{ "service": "chat"\|"analyze"\|"code"\|"research", "input": "..." }` |
+| `lila_services` | `GET /api/services`: prices, `network`, `llmReady`, x402 flags |
+| `lila_health` | `GET /api/health`: liveness |
+| `lila_query` | `POST /api/agent/query`: body `{ "service": "chat"\|"analyze"\|"code"\|"research", "input": "..." }` |
 
 **Env:** `LILA_BASE_URL=https://lilagent.xyz` (no trailing slash). **Repo:** [nrlartt/lila-agent](https://github.com/nrlartt/lila-agent). **MCP config:** `config/openclaw-lila.mcp.example.json`.
 

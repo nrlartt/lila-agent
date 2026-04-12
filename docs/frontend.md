@@ -3,7 +3,7 @@
 ## Stack
 
 - **React 18** + **Vite** (dev/build tooling)
-- **react-router-dom** — `BrowserRouter` with routes including `/`, `/terminal`, `/docs`
+- **react-router-dom**: `BrowserRouter` with routes including `/`, `/terminal`, `/docs`
 - Global styles: `src/styles.css` (terminal), `src/home.css` (landing)
 
 ## Routes
@@ -16,7 +16,7 @@
 
 ## Terminal
 
-- `src/components/Terminal.jsx` — command loop, boot lines, `fetch("/api/services")` on boot.
+- `src/components/Terminal.jsx`: command loop, boot lines, `fetch("/api/services")` on boot.
 - Wallet: `src/lib/wallet.js` (Freighter).
 - Paid calls: `src/lib/x402UserClient.js` + `@x402/fetch`.
 

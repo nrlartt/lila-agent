@@ -1,5 +1,5 @@
 /**
- * MCP server (stdio) — exposes LILA to OpenClaw, Cursor, Claude Code, and other MCP clients.
+ * MCP server (stdio). Exposes LILA to OpenClaw, Cursor, Claude Code, and other MCP clients.
  * Calls POST /api/agent/query on the LILA backend (x402 paid when STELLAR_AGENT_SECRET is set).
  *
  * Do not write to stdout except MCP JSON-RPC (use console.error for debug).
@@ -60,7 +60,7 @@ const server = new McpServer(
       "Production API: set LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" +
         PORT +
         " locally).",
-      "Primary tool: lila_query(service, input) — routes through /api/agent/query.",
+      "Primary tool: lila_query(service, input). Routes through /api/agent/query.",
     ].join(" "),
   },
 );

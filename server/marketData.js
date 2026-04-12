@@ -123,7 +123,7 @@ Could not fetch live data for "${coinId}" right now.
       : "n/a";
 
   return `
-[LIVE DATA — CoinGecko — ONLY use these numbers for price / mcap / volume / 24h change]
+[LIVE DATA | CoinGecko | ONLY use these numbers for price / mcap / volume / 24h change]
 - Asset (CoinGecko id): ${snap.coinId}
 - Spot price (USD): ${formatUsd(snap.priceUsd)}
 - 24h change: ${ch}

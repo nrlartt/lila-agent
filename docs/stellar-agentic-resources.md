@@ -4,8 +4,8 @@ Curated links for operators integrating **x402**, **MPP**, wallets, and **MCP** 
 
 ## OpenClaw
 
-- [OpenClaw documentation](https://docs.openclaw.ai/) — gateway, channels, dashboard.
-- [OpenClaw CLI: `mcp`](https://docs.openclaw.ai/cli/mcp) — MCP client registry (`mcp.servers`), stdio (`command`, `args`, `cwd`, `env`), SSE/HTTP.
+- [OpenClaw documentation](https://docs.openclaw.ai/): gateway, channels, dashboard.
+- [OpenClaw CLI: `mcp`](https://docs.openclaw.ai/cli/mcp): MCP client registry (`mcp.servers`), stdio (`command`, `args`, `cwd`, `env`), SSE/HTTP.
 
 ## x402 on Stellar
 
@@ -40,13 +40,13 @@ Curated links for operators integrating **x402**, **MPP**, wallets, and **MCP** 
 
 ## Wallets (x402-compatible auth entry signing)
 
-Freighter (browser), Albedo, Hana, HOT, Klever, OneKey — see [Stellar x402 docs](https://developers.stellar.org/docs/build/agentic-payments/x402) for current compatibility notes.
+Freighter (browser), Albedo, Hana, HOT, Klever, OneKey. See [Stellar x402 docs](https://developers.stellar.org/docs/build/agentic-payments/x402) for current compatibility notes.
 
 ## Related MCP & agent tooling
 
-- [stellar-mcp-server](https://github.com/kalepail/stellar-mcp-server) — wallet/token/contract tools for Claude and MCP clients.
-- [mcp-stellar-xdr](https://github.com/stellar-experimental/mcp-stellar-xdr) — XDR encode/decode.
-- [stellar-dev-skill](https://github.com/stellar/stellar-dev-skill) — Stellar development skill for AI assistants.
+- [stellar-mcp-server](https://github.com/kalepail/stellar-mcp-server): wallet/token/contract tools for Claude and MCP clients.
+- [mcp-stellar-xdr](https://github.com/stellar-experimental/mcp-stellar-xdr): XDR encode/decode.
+- [stellar-dev-skill](https://github.com/stellar/stellar-dev-skill): Stellar development skill for AI assistants.
 
 ## Coinbase & Stripe protocol references
 

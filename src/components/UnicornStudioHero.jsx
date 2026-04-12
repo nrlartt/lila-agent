@@ -73,7 +73,7 @@ export default function UnicornStudioHero({ projectId, className = "" }) {
         requestAnimationFrame(() => runInit(U));
       })
       .catch(() => {
-        /* optional: silent fallback — CSS mesh remains */
+        /* optional: silent fallback; CSS mesh remains */
       });
     return () => {
       cancelled = true;

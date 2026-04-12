@@ -6,7 +6,7 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === "true" ? "/lila-website/" : "/",
   plugins: [react()],
   server: {
-    // Dev server may pick the next free port if the default is busy — use the URL printed in the terminal.
+    // Dev server may pick the next free port if the default is busy; use the URL printed in the terminal.
     port: 5173,
     strictPort: false,
     host: true,
