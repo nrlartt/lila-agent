@@ -87,7 +87,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 ### Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/lila-agent.git
+git clone https://github.com/nrlartt/lila-agent.git
 cd lila-agent
 npm install
 cp .env.example .env
@@ -140,7 +140,7 @@ git init
 git add .
 git commit -m "Initial commit: LILA — Neural Terminal"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/lila-agent.git
+git remote add origin https://github.com/nrlartt/lila-agent.git
 git push -u origin main
 ```
 
