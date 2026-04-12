@@ -4,6 +4,7 @@ import "../docs.css";
 
 const toc = [
   { id: "overview", label: "Overview" },
+  { id: "agent-protocol", label: "Agent protocol" },
   { id: "architecture", label: "Architecture" },
   { id: "api", label: "API reference" },
   { id: "environment", label: "Environment" },
@@ -14,6 +15,7 @@ const toc = [
 
 export default function DocsPage() {
   const { siteUrl, githubUrl } = getSiteLinks();
+  const skillHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/skill.md` : "/skill.md";
 
   return (
     <div className="docs-page">
@@ -68,6 +70,22 @@ export default function DocsPage() {
             <code>/docs</code>) and an Express server for <code>/api/*</code>. Premium AI routes use x402 (HTTP 402 +
             Soroban + USDC) when <code>STELLAR_PAY_TO</code> is configured. Remote LLM inference can use OpenClaw
             gateway, Groq, or OpenAI — see <code>LLM_PROVIDER</code> in Environment.
+          </p>
+
+          <h2 id="agent-protocol">Agent protocol</h2>
+          <p>
+            AI runtimes (OpenClaw, Cursor, Claude Code, or any MCP host) should follow the canonical{" "}
+            <strong>skill.md</strong> contract: when to call <code>lila_services</code>, <code>lila_health</code>, and{" "}
+            <code>lila_query</code>, how to map user intent to <code>service</code> + <code>input</code>, and safety
+            rules (no fabricated on-chain data, respect x402 costs).
+          </p>
+          <p>
+            <strong>Read and follow:</strong>{" "}
+            <a href={skillHref} target="_blank" rel="noopener noreferrer">
+              {skillHref}
+            </a>
+            . The same file is served at <code>/skill.md</code> from the static root after build. The optional Cursor /
+            OpenClaw skill in <code>skills/lila-openclaw/SKILL.md</code> points to this URL.
           </p>
 
           <h2 id="architecture">Architecture</h2>

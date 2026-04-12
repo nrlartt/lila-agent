@@ -10,6 +10,9 @@ const UNICORN_PROJECT =
     ? import.meta.env.VITE_UNICORNSTUDIO_PROJECT_ID.trim()
     : DEFAULT_UNICORN_PROJECT;
 
+/** Canonical public skill URL — hero copy, clipboard, and Open link. */
+const SKILL_DOC_PUBLIC_URL = "https://www.lilagent.xyz/skill.md";
+
 function IconArrow() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
@@ -42,12 +45,50 @@ function IconX() {
   );
 }
 
+function IconCopy() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const progressRef = useRef(null);
   const { siteUrl, docsUrl, githubUrl, xUrl } = getSiteLinks();
   const docsExternal = isExternalDocsUrl(docsUrl);
+  const skillHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/skill.md` : "/skill.md";
   /** Hero is above the fold: IO can miss first paint — start hidden, then add in-view after layout (LAB-style kinetic). */
   const [heroReveal, setHeroReveal] = useState(false);
+  const [skillCopyDone, setSkillCopyDone] = useState(false);
+
+  const skillCopyLine = `Read ${SKILL_DOC_PUBLIC_URL} and follow the instructions to join Lila`;
+
+  const copySkillInstruction = async () => {
+    const line = skillCopyLine;
+    try {
+      await navigator.clipboard.writeText(line);
+      setSkillCopyDone(true);
+      window.setTimeout(() => setSkillCopyDone(false), 2200);
+    } catch {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = line;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        setSkillCopyDone(true);
+        window.setTimeout(() => setSkillCopyDone(false), 2200);
+      } catch {
+        /* ignore */
+      }
+    }
+  };
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -146,6 +187,9 @@ export default function HomePage() {
                 </Link>
               )
             ) : null}
+            <a href={skillHref} className="home-nav-docs" title="Canonical agent protocol (skill.md)">
+              Agent protocol
+            </a>
             {(githubUrl || xUrl) && (
               <div className="home-nav-social" aria-label="Social links">
                 {githubUrl ? (
@@ -179,40 +223,70 @@ export default function HomePage() {
           <div className="home-hero-visual" aria-hidden />
           <div className="home-hero-scan" aria-hidden />
           <div className="home-hero-scan-2" aria-hidden />
-          <div className="home-hero-content animate-hero-rise">
-            <div className="home-eyebrow">
-              <span>SYS.ONLINE</span>
-              <span className="home-eyebrow-line" />
+          <div className="home-hero-bottom">
+            <div className="home-hero-content animate-hero-rise">
+              <div className="home-eyebrow">
+                <span>SYS.ONLINE</span>
+                <span className="home-eyebrow-line" />
+              </div>
+              <h1 id="home-heading" className={`kinetic-heading${heroReveal ? " in-view" : ""}`}>
+                Pay-per-request AI
+                <br />
+                <span className="home-gradient-text">on Stellar, settled in USDC.</span>
+              </h1>
+              <p className="home-hero-lead">
+                LILA runs chat, analysis, code, and research behind HTTP APIs. Connect Freighter, approve x402
+                micropayments, and keep keys in your wallet — not in the browser bundle.
+              </p>
+              <div className="home-cta-row">
+                <Link to="/terminal" className="home-btn-primary">
+                  <span>Enter terminal</span>
+                  <IconArrow />
+                </Link>
+                <a href="#capabilities" className="home-btn-secondary">
+                  <span>Explore capabilities</span>
+                  <IconGrid />
+                </a>
+              </div>
             </div>
-            <h1 id="home-heading" className={`kinetic-heading${heroReveal ? " in-view" : ""}`}>
-              Pay-per-request AI
-              <br />
-              <span className="home-gradient-text">on Stellar, settled in USDC.</span>
-            </h1>
-            <p className="home-hero-lead">
-              LILA runs chat, analysis, code, and research behind HTTP APIs. Connect Freighter, approve x402
-              micropayments, and keep keys in your wallet — not in the browser bundle.
-            </p>
-            <div className="home-cta-row">
-              <Link to="/terminal" className="home-btn-primary">
-                <span>Enter terminal</span>
-                <IconArrow />
-              </Link>
-              <a href="#capabilities" className="home-btn-secondary">
-                <span>Explore capabilities</span>
-                <IconGrid />
-              </a>
-            </div>
-          </div>
-          <div
-            className={`home-hero-aside reveal-on-scroll${heroReveal ? " in-view" : ""}`}
-            style={{ "--reveal-delay": "0ms" }}
-          >
-            <p>Integration surface</p>
-            <div className="home-tech-tags">
-              <span>[ x402 ]</span>
-              <span>[ STELLAR ]</span>
-              <span>[ USDC ]</span>
+
+            <div
+              className={`home-hero-rail reveal-on-scroll${heroReveal ? " in-view" : ""}`}
+              style={{ "--reveal-delay": "40ms" }}
+            >
+              <div id="agents" className="home-hero-skill" role="region" aria-label="Agent protocol">
+                <div className="home-hero-skill-header">
+                  <span className="home-hero-skill-badge">Join LILA 🦞</span>
+                </div>
+                <div className="home-hero-skill-panel">
+                  <p className="home-hero-skill-body" title={skillCopyLine}>
+                    Read{" "}
+                    <a
+                      href={SKILL_DOC_PUBLIC_URL}
+                      className="home-hero-skill-url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {SKILL_DOC_PUBLIC_URL}
+                    </a>{" "}
+                    and follow the instructions to join Lila.
+                  </p>
+                  <div className="home-hero-skill-actions">
+                    <button
+                      type="button"
+                      className="home-hero-skill-copy-btn"
+                      onClick={copySkillInstruction}
+                      aria-label="Copy agent instruction to clipboard"
+                    >
+                      <IconCopy />
+                      <span>{skillCopyDone ? "Copied" : "Copy"}</span>
+                    </button>
+                    <a href={SKILL_DOC_PUBLIC_URL} className="home-hero-skill-open-link" target="_blank" rel="noopener noreferrer">
+                      Open
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -491,6 +565,7 @@ export default function HomePage() {
             </div>
             <div className="home-footer-links">
               <Link to="/terminal">Terminal</Link>
+              <a href={skillHref}>Agent protocol</a>
               <a href="#capabilities">Capabilities</a>
               {docsUrl ? (
                 docsExternal ? (

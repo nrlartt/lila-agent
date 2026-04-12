@@ -229,7 +229,8 @@
   min-height: min(80vh, 900px);
   overflow: hidden;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -324,21 +325,63 @@
   }
 }
 
-.home-hero-content {
-  position: absolute;
-  bottom: 3rem;
-  left: 1.5rem;
-  right: 1.5rem;
+.home-hero-bottom {
+  position: relative;
   z-index: 20;
-  max-width: 56rem;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  padding: 0 1.5rem 3rem;
   pointer-events: none;
 }
 
 @media (min-width: 768px) {
-  .home-hero-content {
-    bottom: 3rem;
-    left: 3rem;
-    right: auto;
+  .home-hero-bottom {
+    padding: 0 3rem 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero-bottom {
+    padding: 0 3rem 3.25rem;
+    gap: 1.5rem 3rem;
+  }
+}
+
+.home-hero-content {
+  position: relative;
+  z-index: 20;
+  flex: 1 1 18rem;
+  max-width: min(56rem, 100%);
+  min-width: 0;
+  pointer-events: none;
+}
+
+.home-hero-rail {
+  flex: 0 1 34rem;
+  min-width: min(100%, 22rem);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.1rem;
+  pointer-events: auto;
+}
+
+@media (min-width: 1200px) {
+  .home-hero-rail {
+    flex-basis: 36rem;
+    max-width: 38rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-hero-rail {
+    flex-basis: 100%;
+    align-items: stretch;
+    max-width: none;
   }
 }
 
@@ -425,7 +468,7 @@
 }
 
 .home-cta-row {
-  margin-top: 2rem;
+  margin-top: 1.35rem;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -475,36 +518,133 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-.home-hero-aside {
-  position: absolute;
-  bottom: 3rem;
-  right: 1.5rem;
-  z-index: 30;
-  text-align: right;
-  pointer-events: none;
+/* Hero: agent protocol — copyable line + CTA (wide right rail) */
+.home-hero-skill {
+  scroll-margin-top: 6rem;
+  width: 100%;
+  margin: 0;
+  padding: 1.05rem 1.2rem 1.1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  background: linear-gradient(155deg, rgba(10, 22, 32, 0.94) 0%, rgba(6, 8, 12, 0.92) 45%, rgba(14, 18, 24, 0.88) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 40px rgba(34, 211, 238, 0.1);
+  backdrop-filter: blur(8px);
 }
 
-@media (max-width: 1024px) {
-  .home-hero-aside {
-    display: none;
-  }
-}
-
-.home-hero-aside p {
-  font-family: "Orbitron", sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
-  color: #525252;
-  text-transform: uppercase;
-}
-
-.home-tech-tags {
+.home-hero-skill-header {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.35rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+}
+
+.home-hero-skill-badge {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f0fdff;
+  text-shadow: 0 0 24px rgba(34, 211, 238, 0.4);
+}
+
+.home-hero-skill-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.home-hero-skill-body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.84375rem;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.015em;
+  color: rgba(228, 231, 235, 0.95);
+  user-select: text;
+  cursor: text;
+}
+
+.home-hero-skill-url {
   font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
-  font-size: 0.7rem;
-  color: rgba(34, 211, 238, 0.65);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #7dd3fc;
+  word-break: break-all;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(125, 211, 252, 0.38);
+  transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+}
+
+.home-hero-skill-url:hover {
+  color: #e0f2fe;
+  border-bottom-color: rgba(224, 242, 254, 0.55);
+  text-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+}
+
+.home-hero-skill-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+}
+
+.home-hero-skill-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(34, 211, 238, 0.55);
+  color: #22d3ee;
+  background: rgba(34, 211, 238, 0.12);
+  cursor: pointer;
+  border-radius: 0.3rem;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.home-hero-skill-copy-btn:hover {
+  background: rgba(34, 211, 238, 0.22);
+  color: #fff;
+  border-color: #67e8f9;
+}
+
+.home-hero-skill-open-link {
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.75rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.3rem;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.home-hero-skill-open-link:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.home-inline-code {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.82em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  background: rgba(34, 211, 238, 0.08);
+  color: rgba(34, 211, 238, 0.95);
 }
 
 /* Sections */
