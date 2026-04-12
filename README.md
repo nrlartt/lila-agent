@@ -74,7 +74,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 | `GET /api/health` | Liveness: uptime; `llmReady` = remote inference available (boolean). |
 | `POST /api/premium/*` | Paid AI endpoints (chat, analyze, code, research). |
 | `POST /api/agent/query` | Server agent pays with configured secret (if enabled). |
-| `npm run mcp` | MCP (stdio) for OpenClaw / Cursor / Claude Code — [docs/openclaw-mcp.md](docs/openclaw-mcp.md), example [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
+| `npm run mcp` | MCP (stdio) for OpenClaw / Cursor / Claude Code — [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [optional Skill](skills/lila-openclaw/SKILL.md), example [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
 | SPA `/` | Marketing / lab-style landing (hero + sections). |
 | SPA `/docs` | Technical documentation (API, env, MCP, deployment). |
 | SPA `/terminal` | Full-height terminal UI. |
