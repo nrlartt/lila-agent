@@ -1,0 +1,14 @@
+{
+  "mcp": {
+    "servers": {
+      "lila": {
+        "command": "node",
+        "args": ["mcp/lila-server.mjs"],
+        "cwd": "",
+        "env": {
+          "LILA_BASE_URL": ""
+        }
+      }
+    }
+  }
+}
