@@ -7,6 +7,9 @@
  */
 import { Asset, Networks } from "@stellar/stellar-sdk";
 
+/** Default USD per 1 XLM when env is unset — approximate spot band; override with `LILA_XLM_USD_RATE`. */
+export const DEFAULT_LILA_XLM_USD_RATE = 0.17;
+
 const PASSPHRASE = {
   "stellar:testnet": Networks.TESTNET,
   "stellar:pubnet": Networks.PUBLIC,
@@ -58,8 +61,10 @@ export function buildPremiumAccepts(network, payTo, usdPriceString, opts = {}) {
     opts.enableXlm !== undefined
       ? opts.enableXlm
       : !["0", "false", "no"].includes(String(process.env.LILA_X402_ENABLE_XLM || "true").toLowerCase());
-  const rateRaw = opts.xlmUsdRate ?? parseFloat(process.env.LILA_XLM_USD_RATE || "0.35");
-  const xlmUsdRate = Number.isFinite(rateRaw) && rateRaw > 0 ? rateRaw : 0.35;
+  const rateRaw =
+    opts.xlmUsdRate ?? parseFloat(process.env.LILA_XLM_USD_RATE || String(DEFAULT_LILA_XLM_USD_RATE));
+  const xlmUsdRate =
+    Number.isFinite(rateRaw) && rateRaw > 0 ? rateRaw : DEFAULT_LILA_XLM_USD_RATE;
 
   const usdc = {
     scheme: "exact",
@@ -91,8 +96,8 @@ export function buildPremiumAccepts(network, payTo, usdPriceString, opts = {}) {
 }
 
 export function getXlmUsdRateForApi() {
-  const r = parseFloat(process.env.LILA_XLM_USD_RATE || "0.35");
-  return Number.isFinite(r) && r > 0 ? r : 0.35;
+  const r = parseFloat(process.env.LILA_XLM_USD_RATE || String(DEFAULT_LILA_XLM_USD_RATE));
+  return Number.isFinite(r) && r > 0 ? r : DEFAULT_LILA_XLM_USD_RATE;
 }
 
 export function isXlmPaymentOptionEnabled() {

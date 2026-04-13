@@ -7,6 +7,7 @@ import {
   PRICE_MAP,
   priceUsdFromDisplay,
 } from "./serviceRegistry.js";
+import { DEFAULT_LILA_XLM_USD_RATE } from "./x402PremiumAccepts.js";
 
 const SERVICE_LINES = {
   chat: {
@@ -80,7 +81,7 @@ export function buildCatalog(req, ctx) {
     version,
     port,
     paymentAssets = ["USDC"],
-    xlmUsdRate = 0.35,
+    xlmUsdRate = DEFAULT_LILA_XLM_USD_RATE,
   } = ctx;
 
   const envBase =

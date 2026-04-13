@@ -8,7 +8,7 @@ Load order: `.env` at the repository root (see `server/index.js` and Vite for cl
 |----------|----------|-------------|
 | `STELLAR_PAY_TO` | For x402 middleware | Public key receiving USDC / XLM |
 | `LILA_X402_ENABLE_XLM` | Optional | If not `false`, x402 `accepts` includes native XLM (SAC) after USDC |
-| `LILA_XLM_USD_RATE` | Optional | Notional USD per 1 XLM to derive XLM amounts from dollar prices (default `0.35`) |
+| `LILA_XLM_USD_RATE` | Optional | Notional USD per 1 XLM to derive XLM amounts from dollar prices (default `0.17`, approximate spot; not an oracle) |
 | `STELLAR_AGENT_SECRET` | Optional | Server agent secret for `/api/agent/query` |
 | `STELLAR_NETWORK` | Recommended | e.g. `stellar:testnet` or `stellar:pubnet` |
 | `FACILITATOR_URL` | Defaulted | x402 facilitator HTTP endpoint |

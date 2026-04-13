@@ -28,7 +28,7 @@ Metadata for the UI and clients. No secrets.
   "paymentAssets": ["USDC", "XLM"],
   "x402DefaultAsset": "USDC",
   "xlmPaymentOptionEnabled": true,
-  "xlmUsdRate": 0.35,
+  "xlmUsdRate": 0.17,
   "apiCatalog": { "method": "GET", "path": "/api/catalog", "format": "application/json" },
   "integrationHints": {
     "websiteTerminal": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/chat", "..."] },
