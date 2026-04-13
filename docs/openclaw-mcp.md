@@ -1,6 +1,6 @@
 # OpenClaw, Stellar x402, and LILA MCP
 
-This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server**. **`lila_query`** uses **`LILA_PAYER_SECRET`** (your Stellar secret in the MCP `env`) to pay via **x402** on **`POST /api/premium/*`**. If **`LILA_PAYER_SECRET`** is unset, it falls back to **`POST /api/agent/query`** (demo or the API server’s **`STELLAR_AGENT_SECRET`**).
+This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server**. **`lila_query`** **requires** **`LILA_PAYER_SECRET`** in the MCP `env` to pay via **x402** on **`POST /api/premium/*`**. Without it, **`lila_query`** returns an error unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (local dev only), which allows **`POST /api/agent/query`** (server **`STELLAR_AGENT_SECRET`** or demo).
 
 **Production API origin:** **`https://lilagent.xyz`** (no path prefix). Other agents should use this as **`LILA_BASE_URL`** when calling the MCP-backed HTTP API.
 
@@ -49,7 +49,7 @@ OpenClaw stores outbound MCP definitions under **`mcp.servers`** in `~/.openclaw
 | `command` | Executable (e.g. `node`) |
 | `args` | Arguments (e.g. `mcp/lila-server.mjs`) |
 | `cwd` / `workingDirectory` | **Repository root** (where `node_modules` exists) |
-| `env` | **`LILA_BASE_URL`**: `https://lilagent.xyz` (or `http://127.0.0.1:3001` locally). **`LILA_PAYER_SECRET`**: your Stellar secret so **`lila_query`** pays via x402 (recommended). Optional: **`STELLAR_NETWORK`**, **`STELLAR_RPC_URL`** to match the deployment. |
+| `env` | **`LILA_BASE_URL`**: `https://lilagent.xyz` (or `http://127.0.0.1:3001` locally). **`LILA_PAYER_SECRET`**: **required** for **`lila_query`** (x402 on **`/api/premium/*`**). Optional: **`STELLAR_NETWORK`**, **`STELLAR_RPC_URL`**. Dev-only: **`LILA_ALLOW_SERVER_AGENT_QUERY`**: `true` allows **`/api/agent/query`** without **`LILA_PAYER_SECRET`** (do not use in production). |
 
 ### Example fragment
 
@@ -64,10 +64,16 @@ Copy and merge **`config/openclaw-lila.mcp.example.json`** into your OpenClaw co
 openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/ABS/PATH/TO/lilagent","env":{"LILA_BASE_URL":"https://lilagent.xyz","LILA_PAYER_SECRET":"YOUR_S_SECRET"}}'
 ```
 
-For local development only:
+For local development only (API on localhost):
 
 ```bash
-openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/ABS/PATH/TO/lilagent","env":{"LILA_BASE_URL":"http://127.0.0.1:3001"}}'
+openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/ABS/PATH/TO/lilagent","env":{"LILA_BASE_URL":"http://127.0.0.1:3001","LILA_PAYER_SECRET":"YOUR_S_SECRET"}}'
+```
+
+If you intentionally skip **`LILA_PAYER_SECRET`** on localhost (server-agent fallback only):
+
+```bash
+openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/ABS/PATH/TO/lilagent","env":{"LILA_BASE_URL":"http://127.0.0.1:3001","LILA_ALLOW_SERVER_AGENT_QUERY":"true"}}'
 ```
 
 Use your OS path format; restart the OpenClaw gateway after changes.

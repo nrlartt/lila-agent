@@ -11,8 +11,9 @@
  *   OPENCLAW_HOME: default ~/.openclaw
  *   LILA_BASE_URL: default https://lilagent.xyz (overridden by --base-url=)
  *
- * Note: x402 wallet vars (STELLAR_PAY_TO, STELLAR_AGENT_SECRET) belong on the
- * LILA HTTP server env (Railway etc.), not in the OpenClaw MCP client.
+ * Note: STELLAR_PAY_TO / STELLAR_AGENT_SECRET belong on the LILA API server.
+ * MCP clients must add LILA_PAYER_SECRET to the `env` above (or set
+ * LILA_ALLOW_SERVER_AGENT_QUERY=true for local dev only).
  */
 
 import fs from "fs";
@@ -53,5 +54,8 @@ console.log("\n[lila] Register MCP (restart OpenClaw gateway after):\n");
 console.log(`openclaw mcp set lila ${JSON.stringify(json)}`);
 console.log("\n[lila] LILA_BASE_URL for this fragment:", baseUrl);
 console.log(
-  "[lila] x402: configure STELLAR_PAY_TO / STELLAR_AGENT_SECRET on the LILA API server (e.g. Railway), not here.\n"
+  "[lila] Add LILA_PAYER_SECRET to OpenClaw mcp.servers.lila.env so lila_query pays from your wallet (merge into the JSON above).\n"
+);
+console.log(
+  "[lila] API server: STELLAR_PAY_TO etc. on Railway; dev-only fallback: LILA_ALLOW_SERVER_AGENT_QUERY=true.\n"
 );

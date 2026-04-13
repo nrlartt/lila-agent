@@ -60,7 +60,7 @@ The **landing page** is a separate route from the **terminal** (`/` vs `/termina
 2. The **frontend** calls `/api/premium/<service>` with JSON body. If x402 is active, the first response is **HTTP 402** with payment requirements.
 3. The **client** uses `@x402/fetch` to complete payment (sign with Freighter, retry with proof headers).
 4. The **facilitator** verifies and settles **USDC** on Stellar; the server returns the **AI response** (remote inference when configured, otherwise static fallbacks).
-5. **OpenClaw / MCP:** set **`LILA_PAYER_SECRET`** in the MCP process so **`lila_query`** pays via x402 on **`/api/premium/*`** from **your** wallet. **`STELLAR_AGENT_SECRET`** on the server is only for the **`/api/agent/query`** fallback when MCP does not set **`LILA_PAYER_SECRET`**.
+5. **OpenClaw / MCP:** **`LILA_PAYER_SECRET`** is **required** in the MCP env so **`lila_query`** pays via x402 on **`/api/premium/*`** from **your** wallet. **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only) enables **`/api/agent/query`** without it (server **`STELLAR_AGENT_SECRET`** or demo).
 
 See **`.env.example`** for all variables (Stellar network, pay-to address, facilitator URL, optional **neural gateway** via WebSocket, optional HTTP inference keys).
 
@@ -73,8 +73,8 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 | `GET /api/services` | Public: network label, x402 on/off, service list (no secrets). |
 | `GET /api/health` | Liveness: uptime; `llmReady` = remote inference available (boolean). |
 | `POST /api/premium/*` | Paid AI endpoints (chat, analyze, code, research). |
-| `POST /api/agent/query` | Fallback when MCP has no **`LILA_PAYER_SECRET`**: server agent pays or demo (if enabled). |
-| `npm run mcp` | MCP (stdio): **`lila_query`** uses **`LILA_PAYER_SECRET`** → **`/api/premium/*`**, else **`/api/agent/query`**. See [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [optional Skill](skills/lila-openclaw/SKILL.md), example [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
+| `POST /api/agent/query` | Optional MCP fallback when **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** and no **`LILA_PAYER_SECRET`**: server agent or demo. |
+| `npm run mcp` | MCP: **`lila_query`** requires **`LILA_PAYER_SECRET`** ( **`/api/premium/*`** ). See [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [Skill](skills/lila-openclaw/SKILL.md), [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
 | SPA `/` | Marketing / lab-style landing (hero + sections). |
 | SPA `/docs` | Technical documentation (API, env, MCP, deployment). |
 | SPA `/terminal` | Full-height terminal UI. |

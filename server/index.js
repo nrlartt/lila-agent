@@ -200,7 +200,7 @@ app.get("/api/services", (_req, res) => {
       mcpLilaQuery: {
         protocol: "x402",
         description:
-          "MCP lila_query: set LILA_PAYER_SECRET in the MCP env to pay from the operator wallet on POST /api/premium/*; if unset, falls back to POST /api/agent/query (server agent or demo).",
+          "MCP lila_query: LILA_PAYER_SECRET required in MCP env for POST /api/premium/*; LILA_ALLOW_SERVER_AGENT_QUERY=true (dev only) allows POST /api/agent/query fallback.",
         paths: [
           "POST /api/premium/chat",
           "POST /api/premium/analyze",

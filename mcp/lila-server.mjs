@@ -30,6 +30,11 @@ const NETWORK = process.env.STELLAR_NETWORK || "stellar:testnet";
 const RPC_URL = process.env.STELLAR_RPC_URL || "https://soroban-testnet.stellar.org";
 const PAY_TO = process.env.STELLAR_PAY_TO?.trim() || "";
 
+/** Only for local/dev: allow POST /api/agent/query without LILA_PAYER_SECRET. Never use in production OpenClaw. */
+const ALLOW_SERVER_AGENT_QUERY =
+  process.env.LILA_ALLOW_SERVER_AGENT_QUERY === "true" ||
+  process.env.LILA_ALLOW_SERVER_AGENT_QUERY === "1";
+
 const BODY_KEY_MAP = { chat: "message", analyze: "query", code: "prompt", research: "topic" };
 const PRICE_MAP = { chat: "$0.001", analyze: "$0.01", code: "$0.005", research: "$0.02" };
 
@@ -53,10 +58,16 @@ async function getPayerStatus() {
     return {
       externalPayerConfigured: false,
       payerPublicKey: null,
-      lilaQueryPayment: "server",
-      lilaQueryHttp: "POST /api/agent/query (uses API server STELLAR_AGENT_SECRET or demo)",
+      lilaPayerSecretRequired: true,
+      serverAgentFallbackAllowed: ALLOW_SERVER_AGENT_QUERY,
+      lilaQueryPayment: ALLOW_SERVER_AGENT_QUERY ? "server_fallback" : "blocked_without_secret",
+      lilaQueryHttp: ALLOW_SERVER_AGENT_QUERY
+        ? "POST /api/agent/query (only because LILA_ALLOW_SERVER_AGENT_QUERY=true)"
+        : "lila_query requires LILA_PAYER_SECRET (POST /api/premium/*)",
       network: NETWORK,
-      hint: "Set LILA_PAYER_SECRET in this MCP process env (e.g. OpenClaw mcp.servers.lila.env) so lila_query pays from YOUR wallet on POST /api/premium/*.",
+      hint: ALLOW_SERVER_AGENT_QUERY
+        ? "Optional: set LILA_PAYER_SECRET to pay from your wallet instead of the API server agent."
+        : "Set LILA_PAYER_SECRET in this MCP process env (e.g. OpenClaw mcp.servers.lila.env). For local dev only, set LILA_ALLOW_SERVER_AGENT_QUERY=true to allow server agent fallback.",
     };
   }
   try {
@@ -64,6 +75,8 @@ async function getPayerStatus() {
     const kp = Keypair.fromSecret(secret);
     return {
       externalPayerConfigured: true,
+      lilaPayerSecretRequired: true,
+      serverAgentFallbackAllowed: false,
       payerPublicKey: kp.publicKey(),
       lilaQueryPayment: "external_wallet",
       lilaQueryHttp: "POST /api/premium/* (x402 signed by LILA_PAYER_SECRET)",
@@ -72,9 +85,11 @@ async function getPayerStatus() {
   } catch (err) {
     return {
       externalPayerConfigured: false,
+      lilaPayerSecretRequired: true,
+      serverAgentFallbackAllowed: ALLOW_SERVER_AGENT_QUERY,
       payerPublicKey: null,
-      lilaQueryPayment: "server",
-      lilaQueryHttp: "POST /api/agent/query (fallback; invalid LILA_PAYER_SECRET)",
+      lilaQueryPayment: "invalid_secret",
+      lilaQueryHttp: "Fix LILA_PAYER_SECRET or set LILA_ALLOW_SERVER_AGENT_QUERY=true for dev fallback",
       network: NETWORK,
       error: "LILA_PAYER_SECRET is set but not a valid Stellar secret key.",
       detail: err instanceof Error ? err.message : String(err),
@@ -180,8 +195,8 @@ const server = new McpServer(
   {
     instructions: [
       "LILA Neural Terminal on Stellar: paid AI (chat, analyze, code, research) via x402.",
-      "Set LILA_PAYER_SECRET in the MCP process env so OpenClaw pays from YOUR Stellar wallet (POST /api/premium/*).",
-      "If LILA_PAYER_SECRET is unset, lila_query uses POST /api/agent/query (demo or server agent wallet).",
+      "lila_query requires LILA_PAYER_SECRET in the MCP env (POST /api/premium/* from YOUR wallet).",
+      "Optional dev-only: LILA_ALLOW_SERVER_AGENT_QUERY=true allows POST /api/agent/query without LILA_PAYER_SECRET.",
       "Production API: LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" + PORT + " locally).",
       "Match STELLAR_NETWORK and STELLAR_RPC_URL to the deployment (testnet vs mainnet).",
       "Tool lila_payer_status: shows whether LILA_PAYER_SECRET is active and the payer G address (no secrets).",
@@ -222,7 +237,7 @@ server.registerTool(
   "lila_payer_status",
   {
     description:
-      "MCP-only: whether LILA_PAYER_SECRET is set. If yes, shows payer public address and that lila_query uses /api/premium/*. If no, lila_query uses /api/agent/query (server wallet). Never exposes the secret.",
+      "MCP-only: whether LILA_PAYER_SECRET is set and whether server-agent fallback is allowed. Never exposes the secret.",
   },
   async () => {
     return jsonResult(await getPayerStatus());
@@ -235,7 +250,7 @@ server.registerTool(
   "lila_query",
   {
     description:
-      "Run a paid LILA service. If LILA_PAYER_SECRET is set, pays from that wallet (x402 on /api/premium/*). Otherwise uses /api/agent/query (server agent or demo).",
+      "Run a paid LILA service. Requires LILA_PAYER_SECRET (x402 on /api/premium/*). Optional dev: LILA_ALLOW_SERVER_AGENT_QUERY=true enables /api/agent/query fallback.",
     inputSchema: {
       service: serviceSchema.describe("LILA service id"),
       input: z.string().min(1).describe("User message, query, prompt, or research topic"),
@@ -244,6 +259,15 @@ server.registerTool(
   async ({ service, input }) => {
     if (process.env.LILA_PAYER_SECRET?.trim()) {
       return queryWithExternalPayer(service, input);
+    }
+
+    if (!ALLOW_SERVER_AGENT_QUERY) {
+      return jsonResult({
+        error: "LILA_PAYER_SECRET_REQUIRED",
+        message:
+          "External MCP must set LILA_PAYER_SECRET so lila_query pays from your wallet (POST /api/premium/*).",
+        hint: "Add LILA_PAYER_SECRET to OpenClaw mcp.servers.<name>.env (or the MCP process env). For local dev only, set LILA_ALLOW_SERVER_AGENT_QUERY=true to allow the server agent fallback.",
+      });
     }
 
     const { ok, status, data } = await httpJson("POST", `${baseUrl}/api/agent/query`, {
