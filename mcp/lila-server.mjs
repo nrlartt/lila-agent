@@ -1,10 +1,10 @@
 /**
  * MCP server (stdio). Exposes LILA to OpenClaw, Cursor, Claude Code, and other MCP clients.
  *
- * When LILA_PAYER_SECRET is set, lila_query pays from that wallet via x402 on POST /api/premium/*.
- * Otherwise it falls back to POST /api/agent/query (demo or server STELLAR_AGENT_SECRET).
+ * External agents must set LILA_PAYER_SECRET before lila_query (x402 on POST /api/premium/*).
+ * Optional dev-only: LILA_ALLOW_SERVER_AGENT_QUERY=true enables POST /api/agent/query fallback.
  *
- * Do not write to stdout except MCP JSON-RPC (use console.error for debug).
+ * Do not write to stdout except MCP JSON-RPC (use console.error for warnings).
  */
 import dotenv from "dotenv";
 import path from "path";
@@ -34,6 +34,19 @@ const PAY_TO = process.env.STELLAR_PAY_TO?.trim() || "";
 const ALLOW_SERVER_AGENT_QUERY =
   process.env.LILA_ALLOW_SERVER_AGENT_QUERY === "true" ||
   process.env.LILA_ALLOW_SERVER_AGENT_QUERY === "1";
+
+const PAYER_SECRET_SET = !!process.env.LILA_PAYER_SECRET?.trim();
+
+if (!PAYER_SECRET_SET && !ALLOW_SERVER_AGENT_QUERY) {
+  console.error(
+    "[lila-mcp] Wallet not configured: set LILA_PAYER_SECRET in OpenClaw mcp env before using lila_query. " +
+      "Call lila_payer_status after fixing. Dev-only escape: LILA_ALLOW_SERVER_AGENT_QUERY=true.",
+  );
+} else if (!PAYER_SECRET_SET && ALLOW_SERVER_AGENT_QUERY) {
+  console.error(
+    "[lila-mcp] LILA_PAYER_SECRET unset; LILA_ALLOW_SERVER_AGENT_QUERY=true — lila_query uses server /api/agent/query. Do not use in production.",
+  );
+}
 
 const BODY_KEY_MAP = { chat: "message", analyze: "query", code: "prompt", research: "topic" };
 const PRICE_MAP = { chat: "$0.001", analyze: "$0.01", code: "$0.005", research: "$0.02" };
@@ -200,6 +213,7 @@ const server = new McpServer(
       "Production API: LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" + PORT + " locally).",
       "Match STELLAR_NETWORK and STELLAR_RPC_URL to the deployment (testnet vs mainnet).",
       "Tool lila_payer_status: shows whether LILA_PAYER_SECRET is active and the payer G address (no secrets).",
+      "lila_services includes mcpClient.walletRequiredBeforeLilaQuery and recommendedOrder — configure wallet before lila_query.",
     ].join(" "),
   },
 );
@@ -208,14 +222,32 @@ server.registerTool(
   "lila_services",
   {
     description:
-      "List LILA services, prices, network, and whether x402 and the server agent wallet are ready.",
+      "List LILA services and API metadata. Includes mcpClient.wallet — configure LILA_PAYER_SECRET before lila_query (see lila_payer_status).",
   },
   async () => {
     const { ok, status, data } = await httpJson("GET", `${baseUrl}/api/services`);
     if (!ok) {
       return jsonResult({ error: "Request failed", status, body: data });
     }
-    return jsonResult(data);
+    const payer = await getPayerStatus();
+    const walletReady =
+      payer.externalPayerConfigured === true && !payer.error;
+    return jsonResult({
+      ...data,
+      mcpClient: {
+        walletRequiredBeforeLilaQuery: true,
+        payerWalletConfigured: walletReady,
+        lilaQueryBlockedUntilWallet:
+          !walletReady && !ALLOW_SERVER_AGENT_QUERY,
+        devServerAgentFallbackActive: ALLOW_SERVER_AGENT_QUERY && !PAYER_SECRET_SET,
+        recommendedOrder: [
+          "1. Set LILA_PAYER_SECRET (and STELLAR_NETWORK / STELLAR_RPC_URL) in MCP env; restart OpenClaw gateway.",
+          "2. Call lila_payer_status to confirm payer G address.",
+          "3. Call lila_query for paid AI.",
+        ],
+        payerStatus: payer,
+      },
+    });
   },
 );
 

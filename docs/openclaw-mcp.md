@@ -20,7 +20,7 @@ From the repository root (after `npm install`):
 npm run mcp
 ```
 
-Tools: `lila_services`, `lila_health`, `lila_payer_status` (whether `LILA_PAYER_SECRET` is active), `lila_query` (see [API](api.md)).
+Tools: `lila_services` (merges **`mcpClient`** wallet setup hints), `lila_health`, `lila_payer_status`, `lila_query` (see [API](api.md)).
 
 On a machine that talks to **production**, set before starting the MCP process:
 

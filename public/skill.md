@@ -52,7 +52,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 
 | Tool | HTTP | Inputs | When to use |
 |------|------|--------|-------------|
-| `lila_services` | `GET /api/services` | none | First call to learn prices, `network`, `llmReady`, `x402Server`, `x402Agent`. |
+| `lila_services` | `GET /api/services` + **`mcpClient`** (MCP only) | none | First call: prices, readiness, and **wallet setup** (`mcpClient.walletRequiredBeforeLilaQuery`, `recommendedOrder`). |
 | `lila_health` | `GET /api/health` | none | Liveness only; uptime and `llmReady`. |
 | `lila_payer_status` | *(MCP local; no HTTP)* | none | **`LILA_PAYER_SECRET`** status, payer **G** address, and whether dev fallback is allowed. |
 | `lila_query` | **`POST /api/premium/*`** (requires **`LILA_PAYER_SECRET`**) | JSON: `service`, `input` | Fails until **`LILA_PAYER_SECRET`** is set unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only). |
@@ -84,7 +84,7 @@ User request about LILA / paid AI / Stellar x402
     └─ Need an AI answer via LILA? ──► lila_query(service, input)
 ```
 
-1. Prefer **`lila_services`** once per session (or when the user asks about cost/network) before heavy use of **`lila_query`**.
+1. Prefer **`lila_services`** once per session: ensure **`mcpClient.payerWalletConfigured`** (or set **`LILA_PAYER_SECRET`** first) before **`lila_query`**.
 2. Use **`lila_health`** if the user asks “is LILA up?” or you need a quick health signal.
 3. Use **`lila_query`** for every substantive generation task you delegate to LILA.
 
