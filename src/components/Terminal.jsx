@@ -25,10 +25,12 @@ const BOOT_LINES = [
 const WELCOME_TEXT = `Welcome, Operator. I am LILA, your autonomous AI agent on Stellar.
 
 I offer paid AI services via x402 micropayments:
-  /chat <msg>       Neural conversation         $0.001 USDC
-  /analyze <query>  Market analysis             $0.01  USDC
-  /code <prompt>    Smart contract generation   $0.005 USDC
-  /research <topic> Deep research               $0.02  USDC
+  /chat <msg>         Neural conversation         $0.001 USDC
+  /analyze <query>    Market analysis             $0.01  USDC
+  /code <prompt>      Smart contract generation   $0.005 USDC
+  /research <topic>   Deep research               $0.02  USDC
+  /strategy <brief>   Strategic advisory (premium) $0.012 USDC
+  /blueprint <spec>   Technical blueprint (premium) $0.008 USDC
 
 Wallet commands:
   /wallet           Connect Stellar wallet (Freighter)
@@ -185,7 +187,8 @@ export default function Terminal() {
         addLine("", "output");
         const svcList = serverInfo?.services || [];
         svcList.forEach((s) => {
-          addLine(`  ◆ ${s.name.padEnd(25)} ${s.price.padEnd(10)} /${s.id}`, "info");
+          const tier = s.tier === "premium" ? "★ " : "  ";
+          addLine(`  ${tier}${s.name.padEnd(23)} ${s.price.padEnd(10)} /${s.id}`, "info");
         });
         addLine("", "output");
         addLine(`  Network:  ${serverInfo?.network || "stellar:testnet"}`, "dim");
@@ -197,9 +200,18 @@ export default function Terminal() {
       case "chat":
       case "analyze":
       case "code":
-      case "research": {
+      case "research":
+      case "strategy":
+      case "blueprint": {
         if (!arg) {
-          const hint = { chat: "message", analyze: "query", code: "prompt", research: "topic" };
+          const hint = {
+            chat: "message",
+            analyze: "query",
+            code: "prompt",
+            research: "topic",
+            strategy: "brief",
+            blueprint: "spec",
+          };
           addLine(`✗ Usage: /${cmd_clean} <your ${hint[cmd_clean]}>`, "error");
           break;
         }
@@ -217,13 +229,22 @@ export default function Terminal() {
   }
 
   async function callAgentService(service, userInput) {
-    const priceMap = { chat: 0.001, analyze: 0.01, code: 0.005, research: 0.02 };
+    const priceMap = {
+      chat: 0.001,
+      analyze: 0.01,
+      code: 0.005,
+      research: 0.02,
+      strategy: 0.012,
+      blueprint: 0.008,
+    };
     const price = priceMap[service];
     const bodyKeyMap = {
       chat: "message",
       analyze: "query",
       code: "prompt",
       research: "topic",
+      strategy: "brief",
+      blueprint: "spec",
     };
     const bodyKey = bodyKeyMap[service];
 

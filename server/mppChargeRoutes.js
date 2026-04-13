@@ -119,6 +119,38 @@ export function registerMppChargeRoutes(app, ctx) {
     },
   );
 
+  app.post(
+    "/api/mpp/premium/strategy",
+    gate("0.012", "LILA Strategic Advisory (MPP Charge)"),
+    async (req, res) => {
+      const input = req.body.brief;
+      const aiResponse = await generateAIResponse("strategy", input).catch(() => null);
+      res.json({
+        service: "strategy",
+        payment: "mpp",
+        response: aiResponse || generateResponse("strategy", input),
+        cost: "$0.012",
+        ai: !!aiResponse,
+      });
+    },
+  );
+
+  app.post(
+    "/api/mpp/premium/blueprint",
+    gate("0.008", "LILA Technical Blueprint (MPP Charge)"),
+    async (req, res) => {
+      const input = req.body.spec;
+      const aiResponse = await generateAIResponse("blueprint", input).catch(() => null);
+      res.json({
+        service: "blueprint",
+        payment: "mpp",
+        response: aiResponse || generateResponse("blueprint", input),
+        cost: "$0.008",
+        ai: !!aiResponse,
+      });
+    },
+  );
+
   console.log("[MPP] MPP Charge routes active at /api/mpp/premium/* (Soroban SAC, parallel to x402)");
   return { mppChargeActive: true, mppx };
 }

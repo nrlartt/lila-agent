@@ -55,8 +55,22 @@ if (!PAYER_SECRET_SET && !ALLOW_SERVER_AGENT_QUERY) {
   );
 }
 
-const BODY_KEY_MAP = { chat: "message", analyze: "query", code: "prompt", research: "topic" };
-const PRICE_MAP = { chat: "$0.001", analyze: "$0.01", code: "$0.005", research: "$0.02" };
+const BODY_KEY_MAP = {
+  chat: "message",
+  analyze: "query",
+  code: "prompt",
+  research: "topic",
+  strategy: "brief",
+  blueprint: "spec",
+};
+const PRICE_MAP = {
+  chat: "$0.001",
+  analyze: "$0.01",
+  code: "$0.005",
+  research: "$0.02",
+  strategy: "$0.012",
+  blueprint: "$0.008",
+};
 
 const EXPLORER_BASE =
   NETWORK === "stellar:testnet"
@@ -215,7 +229,7 @@ const server = new McpServer(
   },
   {
     instructions: [
-      "LILA Neural Terminal on Stellar: paid AI (chat, analyze, code, research) via x402.",
+      "LILA Neural Terminal on Stellar: paid AI (chat, analyze, code, research, strategy, blueprint) via x402.",
       "lila_query requires LILA_PAYER_SECRET in the MCP env (POST /api/premium/* from YOUR wallet).",
       "Optional dev-only: LILA_ALLOW_SERVER_AGENT_QUERY=true allows POST /api/agent/query without LILA_PAYER_SECRET.",
       "Production API: LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" + PORT + " locally).",
@@ -296,7 +310,7 @@ server.registerTool(
   },
 );
 
-const serviceSchema = z.enum(["chat", "analyze", "code", "research"]);
+const serviceSchema = z.enum(["chat", "analyze", "code", "research", "strategy", "blueprint"]);
 
 server.registerTool(
   "lila_query",
@@ -305,7 +319,12 @@ server.registerTool(
       "Run a paid LILA service. Requires LILA_PAYER_SECRET (x402 on /api/premium/*). Optional dev: LILA_ALLOW_SERVER_AGENT_QUERY=true enables /api/agent/query fallback.",
     inputSchema: {
       service: serviceSchema.describe("LILA service id"),
-      input: z.string().min(1).describe("User message, query, prompt, or research topic"),
+      input: z
+        .string()
+        .min(1)
+        .describe(
+          "Payload for the chosen service: message (chat), query (analyze), prompt (code), topic (research), brief (strategy), spec (blueprint)",
+        ),
     },
   },
   async ({ service, input }) => {

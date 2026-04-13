@@ -13,6 +13,8 @@ import {
 import { setupLLM, generateAIResponse, getProvider } from "./llm.js";
 import { rateLimitPremium } from "./rateLimit.js";
 import { registerMppChargeRoutes } from "./mppChargeRoutes.js";
+import { buildCatalog } from "./catalog.js";
+import { ALLOWED_SERVICES, BODY_KEY_MAP, PRICE_MAP } from "./serviceRegistry.js";
 
 dotenv.config({
   path: fileURLToPath(new URL("../.env", import.meta.url)),
@@ -159,6 +161,22 @@ async function setupX402Server() {
             payTo: PAY_TO,
           },
         },
+        "POST /api/premium/strategy": {
+          accepts: {
+            scheme: "exact",
+            price: "$0.012",
+            network: NETWORK,
+            payTo: PAY_TO,
+          },
+        },
+        "POST /api/premium/blueprint": {
+          accepts: {
+            scheme: "exact",
+            price: "$0.008",
+            network: NETWORK,
+            payTo: PAY_TO,
+          },
+        },
       },
       new HTTPFacilitatorClient({ url: FACILITATOR_URL }),
       [{ network: NETWORK, server: new ExactStellarScheme() }],
@@ -180,6 +198,8 @@ app.get("/api/services", (_req, res) => {
   res.json({
     name: "LILA Neural Terminal",
     version: "4.0",
+    /** Machine-readable route index (prices, tiers, MPP mirrors). */
+    apiCatalog: { method: "GET", path: "/api/catalog", format: "application/json" },
     network: NETWORK,
     /** Human-readable; no internal provider or model names exposed */
     networkLabel: NETWORK === "stellar:pubnet" ? "Mainnet" : "Testnet",
@@ -195,7 +215,14 @@ app.get("/api/services", (_req, res) => {
       websiteTerminal: {
         protocol: "x402",
         description: "Browser + Freighter; user signs each paid call.",
-        paths: ["POST /api/premium/chat", "POST /api/premium/analyze", "POST /api/premium/code", "POST /api/premium/research"],
+        paths: [
+          "POST /api/premium/chat",
+          "POST /api/premium/analyze",
+          "POST /api/premium/code",
+          "POST /api/premium/research",
+          "POST /api/premium/strategy",
+          "POST /api/premium/blueprint",
+        ],
       },
       mcpLilaQuery: {
         protocol: "x402",
@@ -206,6 +233,8 @@ app.get("/api/services", (_req, res) => {
           "POST /api/premium/analyze",
           "POST /api/premium/code",
           "POST /api/premium/research",
+          "POST /api/premium/strategy",
+          "POST /api/premium/blueprint",
           "POST /api/agent/query",
         ],
       },
@@ -219,16 +248,20 @@ app.get("/api/services", (_req, res) => {
               "POST /api/mpp/premium/analyze",
               "POST /api/mpp/premium/code",
               "POST /api/mpp/premium/research",
+              "POST /api/mpp/premium/strategy",
+              "POST /api/mpp/premium/blueprint",
             ]
           : [],
       },
     },
     llmReady: llm !== "static",
     services: [
-      { id: "chat", name: "Neural Chat", price: "$0.001", description: "Conversation with LILA" },
-      { id: "analyze", name: "Market Analysis", price: "$0.01", description: "Analysis with live crypto quotes when applicable" },
-      { id: "code", name: "Code Generation", price: "$0.005", description: "Soroban / Stellar-oriented code" },
-      { id: "research", name: "Deep Research", price: "$0.02", description: "Structured research briefs" },
+      { id: "chat", name: "Neural Chat", tier: "core", price: "$0.001", description: "Fast, precise Q&A and dialogue" },
+      { id: "analyze", name: "Market Analysis", tier: "core", price: "$0.01", description: "Macro and crypto context; live data when available" },
+      { id: "code", name: "Code Generation", tier: "core", price: "$0.005", description: "Soroban / Stellar-oriented implementation" },
+      { id: "research", name: "Deep Research", tier: "core", price: "$0.02", description: "Structured briefs with limitations" },
+      { id: "strategy", name: "Strategic Advisory", tier: "premium", price: "$0.012", description: "Executive-grade options, trade-offs, and recommendations" },
+      { id: "blueprint", name: "Technical Blueprint", tier: "premium", price: "$0.008", description: "Architecture, flows, and Soroban/Stellar integration design" },
     ],
   });
 });
@@ -244,12 +277,26 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+app.get("/api/catalog", (req, res) => {
+  const networkLabel = NETWORK === "stellar:pubnet" ? "Mainnet" : "Testnet";
+  res.json(
+    buildCatalog(req, {
+      network: NETWORK,
+      networkLabel,
+      rpcUrl: RPC_URL,
+      payTo: PAY_TO || null,
+      x402Active,
+      mppChargeActive,
+      llmReady: getProvider() !== "static",
+      version: "4.0",
+      port: PORT,
+    }),
+  );
+});
+
 // ──────────────────────────────────────────────
 //  AGENT ENDPOINT (routes queries through x402)
 // ──────────────────────────────────────────────
-
-const BODY_KEY_MAP = { chat: "message", analyze: "query", code: "prompt", research: "topic" };
-const PRICE_MAP = { chat: "$0.001", analyze: "$0.01", code: "$0.005", research: "$0.02" };
 /** Base URL for server→server calls to premium routes (Docker / reverse proxy: set explicitly). */
 const INTERNAL_BASE = (process.env.LILA_INTERNAL_BASE_URL || `http://127.0.0.1:${PORT}`).replace(
   /\/$/,
@@ -262,7 +309,7 @@ app.post("/api/agent/query", async (req, res) => {
   if (!service || !input) {
     return res.status(400).json({ error: "Missing service or input" });
   }
-  if (!["chat", "analyze", "code", "research"].includes(service)) {
+  if (!ALLOWED_SERVICES.includes(service)) {
     return res.status(400).json({ error: `Unknown service: ${service}` });
   }
 
@@ -356,6 +403,28 @@ app.post("/api/premium/research", async (req, res) => {
   res.json({ service: "research", response: aiResponse || generateResponse("research", input), cost: "$0.02", ai: !!aiResponse });
 });
 
+app.post("/api/premium/strategy", async (req, res) => {
+  const input = req.body.brief;
+  const aiResponse = await generateAIResponse("strategy", input).catch(() => null);
+  res.json({
+    service: "strategy",
+    response: aiResponse || generateResponse("strategy", input),
+    cost: "$0.012",
+    ai: !!aiResponse,
+  });
+});
+
+app.post("/api/premium/blueprint", async (req, res) => {
+  const input = req.body.spec;
+  const aiResponse = await generateAIResponse("blueprint", input).catch(() => null);
+  res.json({
+    service: "blueprint",
+    response: aiResponse || generateResponse("blueprint", input),
+    cost: "$0.008",
+    ai: !!aiResponse,
+  });
+});
+
 // ──────────────────────────────────────────────
 //  AI RESPONSE GENERATION
 // ──────────────────────────────────────────────
@@ -371,7 +440,7 @@ function generateResponse(service, input) {
     if (q.includes("agent"))
       return `AI agents are autonomous software entities that reason, plan, and act. With x402 on Stellar, agents gain economic agency: paying for API calls, purchasing data, hiring other agents, and monetizing services. LILA demonstrates this via paid AI services settled through Stellar micropayments.`;
     if (q.includes("lila") || q.includes("who"))
-      return `I am LILA, a Neural Terminal AI Agent on the Stellar network. I provide paid AI services through x402 micropayments: chat, market analysis, code generation, and deep research. Each query costs fractions of a cent in USDC, settled instantly on Stellar.`;
+      return `I am LILA, a premium Neural Terminal on Stellar. Services: chat, analysis, code, research, strategic advisory, and technical blueprints—each settled with x402 (USDC).`;
     return `[Neural Core] Processing: "${input}"\n\nI've analyzed your request. As an autonomous AI agent on Stellar, I handle market analysis, code generation, research, and conversation; each is paid via x402 micropayments.\n\nTry: Stellar, x402, AI agents, smart contracts.`;
   }
 
@@ -428,7 +497,8 @@ impl PayPerQueryContract {
 }`;
   }
 
-  return `╔══════════════════════════════════════════╗
+  if (service === "research") {
+    return `╔══════════════════════════════════════════╗
 ║       LILA DEEP RESEARCH ENGINE          ║
 ╚══════════════════════════════════════════╝
 
@@ -450,6 +520,57 @@ make it the ideal platform.
 ━━━ CONCLUSION ━━━━━━━━━━━━━━━━━━━━━━━━━━
 Stellar is uniquely positioned as the payment
 backbone of the agentic economy.`;
+  }
+
+  if (service === "strategy") {
+    return `╔══════════════════════════════════════════╗
+║    LILA STRATEGIC ADVISORY (PREMIUM)     ║
+╚══════════════════════════════════════════╝
+
+Brief: ${input || "Agentic commerce on Stellar"}
+
+━━━ SITUATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Operators need clear monetization paths for AI
+services; x402 enables per-request USDC settlement.
+
+━━━ OPTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A) Freemium + paid tier via premium endpoints
+B) Pure pay-per-call with facilitator settlement
+C) Hybrid: MPP Charge for SAC-native flows
+
+━━━ RECOMMENDATION ━━━━━━━━━━━━━━━━━━━━━━━━
+Start with x402 on HTTPS APIs; measure conversion,
+then expand to agent-to-agent settlement.
+
+━━━ RISKS TO TRACK ━━━━━━━━━━━━━━━━━━━━━━━
+Liquidity, facilitator uptime, user wallet UX.`;
+  }
+
+  if (service === "blueprint") {
+    return `╔══════════════════════════════════════════╗
+║   LILA TECHNICAL BLUEPRINT (PREMIUM)     ║
+╚══════════════════════════════════════════╝
+
+Spec: ${input || "x402-gated inference API"}
+
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   Client    │────▶│  LILA API    │────▶│ Facilitator│
+│ (Freighter) │ 402 │  (Express)   │ pay │  (x402)     │
+└─────────────┘     └──────────────┘     └─────────────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ LLM provider │
+                    └──────────────┘
+
+━━━ TRUST BOUNDARIES ━━━━━━━━━━━━━━━━━━━━━
+User signs USDC auth; server never holds user keys.
+
+━━━ OPEN POINTS ━━━━━━━━━━━━━━━━━━━━━━━━━━
+Rate limits, idempotency keys, refund policy.`;
+  }
+
+  return `[Neural Core] Service "${service}" is not available in static demo mode.`;
 }
 
 const mppResult = registerMppChargeRoutes(app, {

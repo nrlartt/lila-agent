@@ -8,7 +8,7 @@
 
 ## 1. What you are connecting to
 
-**LILA** is a neural terminal stack: paid AI services (**chat**, **analyze**, **code**, **research**) settled on **Stellar**. The public site and API live at **`https://lilagent.xyz`**.
+**LILA** is a neural terminal stack: paid AI services (**chat**, **analyze**, **code**, **research**, plus premium **strategy** and **blueprint**) settled on **Stellar**. The public site and API live at **`https://lilagent.xyz`**.
 
 ### Payment paths (pick one; do not confuse them)
 
@@ -48,7 +48,7 @@ Activate this behavior when **any** of the following is true:
 
 - The user mentions **LILA**, **lilagent.xyz**, **x402**, **Stellar**, or **neural terminal**.
 - You have MCP tools whose names match **`lila_*`** (or are prefixed, e.g. `lila_lila_query`).
-- The user asks you to perform paid AI tasks that map to LILA services (conversation, market-style analysis, Soroban-oriented code, structured research).
+- The user asks you to perform paid AI tasks that map to LILA services (conversation, market-style analysis, Soroban-oriented code, structured research, strategic advisory, technical blueprints).
 - You are configured with **`LILA_BASE_URL=https://lilagent.xyz`** (or a staging URL provided by the operator).
 
 Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless the user explicitly ties the request to LILA.
@@ -82,6 +82,8 @@ Tool names in your runtime may be **prefixed** (e.g. `lila_lila_query`). Use the
 | `analyze` | Market / macro / asset discussion (no guaranteed live prices unless response includes them) | `input` = question or topic |
 | `code` | Soroban / Stellar-oriented code, snippets | `input` = prompt |
 | `research` | Longer structured brief | `input` = topic |
+| `strategy` | Executive / product strategy, positioning, roadmap (premium tier) | `input` = brief or goals |
+| `blueprint` | Technical architecture, API/system design, implementation outline (premium tier) | `input` = spec or constraints |
 
 Map the user’s natural language to **one** `service` per call. If unclear, default to **`chat`** and keep `input` faithful to the user’s words.
 

@@ -42,7 +42,7 @@ The **landing page** is a separate route from the **terminal** (`/` vs `/termina
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Express (Node) · Helmet · CORS · rate limit (premium)       │
-│  /api/premium/chat|analyze|code|research  ← x402 middleware  │
+│  /api/premium/chat|analyze|code|research|strategy|blueprint  ← x402  │
 │  /api/services · /api/health · /api/agent/query (optional MCP fallback) │
 └────────────────────────────┬────────────────────────────────┘
                              │
@@ -56,7 +56,7 @@ The **landing page** is a separate route from the **terminal** (`/` vs `/termina
 
 ## How it works
 
-1. **Operator** opens the app, connects **Freighter**, and runs commands like `/chat`, `/analyze`, `/code`, `/research`.
+1. **Operator** opens the app, connects **Freighter**, and runs commands like `/chat`, `/analyze`, `/code`, `/research`, `/strategy`, `/blueprint`.
 2. The **frontend** calls `/api/premium/<service>` with JSON body. If x402 is active, the first response is **HTTP 402** with payment requirements.
 3. The **client** uses `@x402/fetch` to complete payment (sign with Freighter, retry with proof headers).
 4. The **facilitator** verifies and settles **USDC** on Stellar; the server returns the **AI response** (remote inference when configured, otherwise static fallbacks).
@@ -72,7 +72,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 |--------|---------|
 | `GET /api/services` | Public: network label, x402 on/off, service list (no secrets). |
 | `GET /api/health` | Liveness: uptime; `llmReady` = remote inference available (boolean). |
-| `POST /api/premium/*` | Paid AI endpoints (chat, analyze, code, research). |
+| `POST /api/premium/*` | Paid AI endpoints (core: chat, analyze, code, research; premium: strategy, blueprint). |
 | `POST /api/agent/query` | Optional MCP fallback when **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** and no **`LILA_PAYER_SECRET`**: server agent or demo. |
 | `npm run mcp` | **External agent** process only. Env template: [config/mcp-client.env.example](config/mcp-client.env.example). Docs: [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [Skill](skills/lila-openclaw/SKILL.md), [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
 | SPA `/` | Marketing / lab-style landing (hero + sections). |

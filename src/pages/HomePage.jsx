@@ -73,6 +73,7 @@ function IconCopy() {
 export default function HomePage() {
   const progressRef = useRef(null);
   const { siteUrl, docsUrl, githubUrl, xUrl } = getSiteLinks();
+  const catalogHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/api/catalog` : "/api/catalog";
   const docsExternal = isExternalDocsUrl(docsUrl);
   const skillHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/skill.md` : "/skill.md";
   /** Hero is above the fold: IO can miss first paint; start hidden, then add in-view after layout (LAB-style kinetic). */
@@ -367,8 +368,9 @@ export default function HomePage() {
                 <span className="home-gradient-text">settled in USDC per call.</span>
               </h1>
               <p className="home-hero-lead">
-                LILA delivers chat, analysis, code, and research over production HTTP APIs, with each request priced and
-                settled on Stellar. You authorize x402 micropayments in Freighter. Signing keys remain in your wallet;
+                LILA delivers core chat, analysis, code, and research plus premium strategy and blueprint services over
+                production HTTP APIs, with each request priced and settled on Stellar. You authorize x402 micropayments in
+                Freighter. Signing keys remain in your wallet;
                 nothing sensitive ships in the client bundle.
               </p>
               <div className="home-cta-row">
@@ -698,6 +700,7 @@ export default function HomePage() {
             </div>
             <div className="home-footer-links">
               <Link to="/terminal">Terminal</Link>
+              <a href={catalogHref}>API catalog</a>
               <a href={skillHref}>Agent protocol</a>
               <a href="#capabilities">Capabilities</a>
               {docsUrl ? (

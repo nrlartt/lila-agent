@@ -25,6 +25,7 @@ Metadata for the UI and clients. No secrets.
   "userPaysWithWallet": true,
   "mppCharge": false,
   "mppPremiumBase": null,
+  "apiCatalog": { "method": "GET", "path": "/api/catalog", "format": "application/json" },
   "integrationHints": {
     "websiteTerminal": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/chat", "..."] },
     "mcpLilaQuery": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/...", "POST /api/agent/query"] },
@@ -41,6 +42,11 @@ Metadata for the UI and clients. No secrets.
 - `x402Server`: `true` when `STELLAR_PAY_TO` is set and payment middleware loaded.
 - `mppCharge`: `true` when [MPP Charge](https://developers.stellar.org/docs/build/agentic-payments/mpp) routes are enabled (`MPP_ENABLED=true` and `MPP_SECRET_KEY` set).
 - `mppPremiumBase`: e.g. `/api/mpp/premium` when MPP is on, else `null`.
+- `apiCatalog`: `{ "method": "GET", "path": "/api/catalog", "format": "application/json" }` — pointer to the machine-readable catalog.
+
+### `GET /api/catalog`
+
+Structured JSON describing LILA product lines (core vs premium), **x402** `/api/premium/*` routes (method, path, body fields, `price_usd`), optional **MPP** `/api/mpp/premium/*` mirrors when MPP is enabled, and free routes (`/api/services`, `/api/health`). Intended for agents and integrations; shape is **not** identical to third-party catalogs (e.g. [xlm402.com/api/catalog](https://xlm402.com/api/catalog)).
 
 ### `GET /api/health`
 
@@ -67,6 +73,8 @@ When x402 middleware is active, these endpoints require a successful payment (or
 | POST | `/api/premium/analyze` | `{ "query": string }` |
 | POST | `/api/premium/code` | `{ "prompt": string }` |
 | POST | `/api/premium/research` | `{ "topic": string }` |
+| POST | `/api/premium/strategy` | `{ "brief": string }` |
+| POST | `/api/premium/blueprint` | `{ "spec": string }` |
 
 **Response (typical):**
 
@@ -91,6 +99,8 @@ When `MPP_ENABLED` is set, parallel routes use **MPP Charge** (Soroban SAC, `@st
 | POST | `/api/mpp/premium/analyze` | `{ "query": string }` |
 | POST | `/api/mpp/premium/code` | `{ "prompt": string }` |
 | POST | `/api/mpp/premium/research` | `{ "topic": string }` |
+| POST | `/api/mpp/premium/strategy` | `{ "brief": string }` |
+| POST | `/api/mpp/premium/blueprint` | `{ "spec": string }` |
 
 ## MCP bridge (optional)
 
@@ -106,7 +116,7 @@ Server-side agent pays the premium URL using `STELLAR_AGENT_SECRET` when x402 an
 
 ```json
 {
-  "service": "chat|analyze|code|research",
+  "service": "chat|analyze|code|research|strategy|blueprint",
   "input": "string"
 }
 ```

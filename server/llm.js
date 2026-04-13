@@ -21,10 +21,10 @@ let openaiKey = null;
 let openclawUrl = null;
 let openclawToken = null;
 
-const LILA_SYSTEM_PROMPT = `You are LILA, a Neural Terminal AI Agent on the Stellar network.
-You deliver paid services via x402 (USDC): chat, market analysis, code, research.
-Tone: concise, technical, terminal-friendly. Use ASCII sections where it helps readability.
-Domain strengths: Stellar, Soroban, x402, DeFi, agentic systems, but only when relevant to the user's ask.`;
+const LILA_SYSTEM_PROMPT = `You are LILA, a premium Neural Terminal AI Agent on the Stellar network.
+You deliver paid, production-grade outputs via x402 (USDC): conversation, analysis, code, research, strategy, and technical blueprints.
+Tone: precise, calm, executive-ready where appropriate; terminal-friendly ASCII structure when it improves scanability.
+Domain strengths: Stellar, Soroban, x402, MPP, agentic commerce, DeFi—only when relevant. Never pad with filler; every paragraph should earn its place.`;
 
 /** Applies to every reply (all services, all providers). */
 const LILA_GROUNDING_POLICY = `
@@ -45,10 +45,12 @@ ${LILA_GROUNDING_POLICY.trim()}`;
 
 /** Lower temperature = less creative invention for factual tasks */
 const SERVICE_GEN_OPTS = {
-  chat: { temperature: 0.65, max_tokens: 1024 },
-  analyze: { temperature: 0.32, max_tokens: 1400 },
-  code: { temperature: 0.38, max_tokens: 2560 },
-  research: { temperature: 0.42, max_tokens: 1536 },
+  chat: { temperature: 0.62, max_tokens: 1200 },
+  analyze: { temperature: 0.3, max_tokens: 1600 },
+  code: { temperature: 0.35, max_tokens: 3072 },
+  research: { temperature: 0.4, max_tokens: 2048 },
+  strategy: { temperature: 0.45, max_tokens: 2200 },
+  blueprint: { temperature: 0.33, max_tokens: 2800 },
 };
 
 function getGenOpts(service) {
@@ -251,18 +253,24 @@ export async function generateAIResponse(service, input) {
   const serviceHints = {
     chat: `User message: "${input}"
 
-Reply directly to this. If they ask for real-time or private data you do not have, say you cannot provide it and name what they could verify (e.g. exchange, explorer, official docs). Do not fabricate metrics.`,
+Give a clear, helpful answer. Prefer short sections or bullets when it aids clarity. If they ask for real-time or private data you do not have, say so and name what they could verify (exchange, explorer, docs). Do not fabricate metrics.`,
     analyze: `${analyzeExtra}
 
 User request: "${input}"
 
-Write a concise analysis with ASCII section headers. Obey [STRICT RULES] in any LIVE DATA block; never contradict injected numbers. If no live block exists, do not invent market figures (thematic / educational only).`,
+Premium analysis: lead with a one-line thesis, then sections with ASCII headers. Obey [STRICT RULES] in any LIVE DATA block. Without live data, stay thematic and label uncertainty; do not invent prices or volumes.`,
     code: `Requirement: "${input}"
 
-Output a Soroban (Rust) contract or Stellar-related code. Use real stellar-sdk / soroban-sdk patterns. Comment uncertain API details; do not invent crate methods or opcodes.`,
+Production-oriented Soroban (Rust) or Stellar integration code. Use realistic soroban-sdk / stellar-sdk patterns; note versioning assumptions. Flag anything that needs chain-specific verification. Do not invent crate APIs.`,
     research: `Topic: "${input}"
 
-Produce a structured report: executive summary, sections with clear headers, and a "Limitations" line stating what was not verified. Distinguish established facts from interpretation. Do not invent citations or study statistics; say "not sourced in this session" if needed.`,
+Structured brief: executive summary → numbered findings → risks/limitations → suggested next steps. Separate fact vs inference vs open questions. No fake citations; say "not sourced here" when needed.`,
+    strategy: `Strategic brief request: "${input}"
+
+Deliver board-ready advisory: (1) situation framing, (2) options with trade-offs, (3) recommended path with rationale, (4) risks and metrics to track. Stay Stellar/x402/agentic-commerce aware when relevant. No fabricated KPIs.`,
+    blueprint: `Technical specification request: "${input}"
+
+Produce an architecture blueprint: goals, components, data/control flows, trust boundaries, Soroban/Stellar touchpoints, failure modes, and open decisions. Use diagrams as ASCII boxes/arrows where helpful. No invented protocol details.`,
   };
 
   const prompt = `[LILA ${service.toUpperCase()} SERVICE]\n\n${serviceHints[service] || input}`;

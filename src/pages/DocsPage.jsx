@@ -16,6 +16,7 @@ const toc = [
 export default function DocsPage() {
   const { siteUrl, githubUrl } = getSiteLinks();
   const skillHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/skill.md` : "/skill.md";
+  const catalogHref = siteUrl ? `${siteUrl.replace(/\/$/, "")}/api/catalog` : "/api/catalog";
 
   return (
     <div className="docs-page">
@@ -109,6 +110,12 @@ export default function DocsPage() {
             <li>
               <code>GET /api/health</code>: liveness
             </li>
+            <li>
+              <a href={catalogHref}>
+                <code>GET /api/catalog</code>
+              </a>
+              : machine-readable route index (tiers, prices, optional MPP mirrors)
+            </li>
           </ul>
 
           <h3>Premium (x402 when configured)</h3>
@@ -140,6 +147,16 @@ export default function DocsPage() {
                 <td>POST</td>
                 <td>/api/premium/research</td>
                 <td>{`{ "topic": string }`}</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td>/api/premium/strategy</td>
+                <td>{`{ "brief": string }`}</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td>/api/premium/blueprint</td>
+                <td>{`{ "spec": string }`}</td>
               </tr>
             </tbody>
           </table>
