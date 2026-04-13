@@ -149,13 +149,14 @@ async function httpJson(method, url, body) {
   return { ok: res.ok, status: res.status, data };
 }
 
-async function queryWithExternalPayer(service, input) {
+async function queryWithExternalPayer(service, input, settlementAsset = "USDC") {
   const secret = process.env.LILA_PAYER_SECRET?.trim();
   if (!secret) {
     throw new Error("LILA_PAYER_SECRET not configured");
   }
 
-  const { paidFetch, payerAddress } = await getPayerPaidFetch(secret, NETWORK, RPC_URL);
+  const asset = settlementAsset === "XLM" ? "XLM" : "USDC";
+  const { paidFetch, payerAddress } = await getPayerPaidFetch(secret, NETWORK, RPC_URL, asset);
   const bodyKey = BODY_KEY_MAP[service];
   const price = PRICE_MAP[service];
   const url = `${baseUrl}/api/premium/${service}`;
@@ -182,7 +183,11 @@ async function queryWithExternalPayer(service, input) {
       error: "Payment required (402)",
       status: res.status,
       body: data,
-      hint: "Fund the wallet for LILA_PAYER_SECRET with USDC on this network and retry.",
+      settlementAsset: asset,
+      hint:
+        asset === "XLM"
+          ? "Fund the payer wallet with enough XLM for the SAC transfer + fees, and ensure the API enables XLM (GET /api/services: xlmPaymentOptionEnabled)."
+          : "Fund the wallet for LILA_PAYER_SECRET with USDC on this network and retry.",
     });
   }
 
@@ -211,6 +216,7 @@ async function queryWithExternalPayer(service, input) {
     cost: data?.cost ?? price,
     network: NETWORK,
     timestamp: new Date().toISOString(),
+    settlementAsset: asset,
     payment: {
       paid: true,
       payer: payerAddress,
@@ -218,6 +224,7 @@ async function queryWithExternalPayer(service, input) {
       txHash,
       explorerUrl: txHash ? EXPLORER_BASE + txHash : null,
       mode: "external_payer",
+      settlementAsset: asset,
     },
   });
 }
@@ -236,6 +243,7 @@ const server = new McpServer(
       "Match STELLAR_NETWORK and STELLAR_RPC_URL to the deployment (testnet vs mainnet).",
       "Tool lila_payer_status: shows whether LILA_PAYER_SECRET is active and the payer G address (no secrets).",
       "lila_services includes mcpClient — optional LILA_AUTO_CREATE_PAYER_WALLET auto-provisions a key file (see docs).",
+      "lila_query optional settlementAsset: USDC (default) or XLM — must match API (xlmPaymentOptionEnabled for XLM).",
     ].join(" "),
   },
 );
@@ -311,12 +319,13 @@ server.registerTool(
 );
 
 const serviceSchema = z.enum(["chat", "analyze", "code", "research", "strategy", "blueprint"]);
+const settlementSchema = z.enum(["USDC", "XLM"]);
 
 server.registerTool(
   "lila_query",
   {
     description:
-      "Run a paid LILA service. Requires LILA_PAYER_SECRET (x402 on /api/premium/*). Optional dev: LILA_ALLOW_SERVER_AGENT_QUERY=true enables /api/agent/query fallback.",
+      "Run a paid LILA service. Requires LILA_PAYER_SECRET (x402 on /api/premium/*). Optional settlementAsset: USDC (default) or XLM when the API enables it. Optional dev: LILA_ALLOW_SERVER_AGENT_QUERY=true enables /api/agent/query fallback (USDC-only).",
     inputSchema: {
       service: serviceSchema.describe("LILA service id"),
       input: z
@@ -325,11 +334,16 @@ server.registerTool(
         .describe(
           "Payload for the chosen service: message (chat), query (analyze), prompt (code), topic (research), brief (strategy), spec (blueprint)",
         ),
+      settlementAsset: settlementSchema
+        .optional()
+        .describe(
+          "Settlement asset for x402: USDC (default) or native XLM (Soroban SAC). Use XLM only if GET /api/services reports xlmPaymentOptionEnabled.",
+        ),
     },
   },
-  async ({ service, input }) => {
+  async ({ service, input, settlementAsset }) => {
     if (process.env.LILA_PAYER_SECRET?.trim()) {
-      return queryWithExternalPayer(service, input);
+      return queryWithExternalPayer(service, input, settlementAsset ?? "USDC");
     }
 
     if (!ALLOW_SERVER_AGENT_QUERY) {

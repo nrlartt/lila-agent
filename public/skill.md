@@ -15,7 +15,7 @@
 | Who pays | How you integrate | Protocol / endpoints |
 |----------|-------------------|----------------------|
 | **End user in the browser** (website terminal) | Freighter + x402 client | **x402** on `POST /api/premium/*` |
-| **OpenClaw / MCP** | MCP tools `lila_services`, `lila_query` — **`LILA_PAYER_SECRET` required** in the MCP process | **x402** on `POST /api/premium/*`; USDC from the **operator’s wallet** (not Freighter, not the API’s `STELLAR_AGENT_SECRET`) |
+| **OpenClaw / MCP** | MCP tools `lila_services`, `lila_query` — **`LILA_PAYER_SECRET` required** in the MCP process | **x402** on `POST /api/premium/*`; **USDC** or **native XLM** (optional `settlementAsset` on `lila_query`) from the **operator’s wallet** (not Freighter, not the API’s `STELLAR_AGENT_SECRET`) |
 | **OpenClaw / MCP** (local dev only) | Same tools + **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** without **`LILA_PAYER_SECRET`** | **`POST /api/agent/query`** fallback — server agent or demo; **do not use in production** |
 | **External autonomous agent or backend** (non-MCP HTTP) with its **own** signer | Direct HTTP from your process | **MPP Charge** on `POST /api/mpp/premium/*` **only if** `GET /api/services` reports `mppCharge: true` — use **`@stellar/mpp/charge/client`**. Or use **x402** on `POST /api/premium/*` with `@x402/fetch` (same JSON bodies and prices). |
 
@@ -70,7 +70,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 | `lila_services` | `GET /api/services` + **`mcpClient`** (MCP only) | none | First call: prices, readiness, and **wallet setup** (`mcpClient.walletRequiredBeforeLilaQuery`, `recommendedOrder`). |
 | `lila_health` | `GET /api/health` | none | Liveness only; uptime and `llmReady`. |
 | `lila_payer_status` | *(MCP local; no HTTP)* | none | **`LILA_PAYER_SECRET`** status, payer **G** address, and whether dev fallback is allowed. Alias: **`lila_mcp_payer_status`**. If your host hides this tool, read **`lila_services`** → **`mcpClient.payerStatus`** (same data). |
-| `lila_query` | **`POST /api/premium/*`** (requires **`LILA_PAYER_SECRET`**) | JSON: `service`, `input` | Fails until **`LILA_PAYER_SECRET`** is set unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only). |
+| `lila_query` | **`POST /api/premium/*`** (requires **`LILA_PAYER_SECRET`**) | JSON: `service`, `input`; optional **`settlementAsset`**: `"USDC"` (default) or `"XLM"` when **`GET /api/services`** has **`xlmPaymentOptionEnabled`** | Fails until **`LILA_PAYER_SECRET`** is set unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only). |
 
 Tool names in your runtime may be **prefixed** (e.g. `lila_lila_query`). Use the tools list returned by the host.
 
@@ -98,7 +98,7 @@ User request about LILA / paid AI / Stellar x402
     │
     ├─ Need only up/down status? ──► lila_health
     │
-    └─ Need an AI answer via LILA? ──► lila_query(service, input)
+    └─ Need an AI answer via LILA? ──► lila_query(service, input [, settlementAsset])
 ```
 
 1. Prefer **`lila_services`** once per session: ensure **`mcpClient.payerWalletConfigured`** (or set **`LILA_PAYER_SECRET`** first) before **`lila_query`**.
@@ -110,7 +110,7 @@ User request about LILA / paid AI / Stellar x402
 ## 6. Behavior rules (must follow)
 
 1. **Truthfulness:** Do not invent Stellar addresses, transaction hashes, block heights, “live” prices, or wallet balances. Treat **tool output** as authoritative; if a field is missing, say so.
-2. **Costs (MCP):** With **`LILA_PAYER_SECRET`**, **`lila_query`** spends **USDC** from the **operator payer wallet** (x402 on **`/api/premium/*`**). Without it, **`lila_query`** fails unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (then **`/api/agent/query`** may use the **server agent** or demo).
+2. **Costs (MCP):** With **`LILA_PAYER_SECRET`**, **`lila_query`** settles in **USDC** (default) or **native XLM** if you pass **`settlementAsset: "XLM"`** and the API enables it (`xlmPaymentOptionEnabled`). Without a payer key, **`lila_query`** fails unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (then **`/api/agent/query`** may use the **server agent** or demo; USDC-only).
 3. **Costs (MPP):** **MPP** (`/api/mpp/premium/*`) is for **direct HTTP** clients using **`@stellar/mpp/charge/client`**, not the default MCP path. If `mppCharge` is false, MPP is off.
 4. **No Freighter in MCP path:** The MCP **`lila_query`** path does **not** use the end-user’s browser wallet (it uses **`LILA_PAYER_SECRET`**, or dev-only server-agent fallback). Do not instruct the user to “sign in Freighter” for MCP tool calls unless you are describing the **website terminal** flow separately.
 5. **Errors:** If a tool returns non-2xx or error JSON, surface a concise explanation to the user and **do not** fabricate a successful LILA response.
