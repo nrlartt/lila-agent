@@ -23,7 +23,21 @@
 
 `GET /api/services` returns `integrationHints` and flags (`x402Server`, `mppCharge`, `x402Agent`) so you can branch at runtime.
 
-You typically interact through the **MCP stdio server** in the [`lila-agent`](https://github.com/nrlartt/lila-agent) repository (`npm run mcp`), which calls LILA’s HTTP endpoints. You are **not** the end-user’s browser wallet. **External-agent env** (OpenClaw `mcp.servers.*.env`) is separate from the API server — use **`config/mcp-client.env.example`** as the template. Configure **`LILA_PAYER_SECRET`** (or file / **`LILA_AUTO_CREATE_PAYER_WALLET`**) so **`lila_query`** pays via **x402** on **`/api/premium/*`**. Without a payer key, **`lila_query`** fails unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev-only server fallback).
+You typically interact through the **MCP stdio server** in the [`lila-agent`](https://github.com/nrlartt/lila-agent) repository (`npm run mcp`), which calls LILA’s HTTP endpoints. You are **not** the end-user’s browser wallet. **External-agent env** (OpenClaw `mcp.servers.*.env`) is separate from the API server — use the template file below. Configure a **payer key** so **`lila_query`** pays via **x402** on **`/api/premium/*`**. Without a payer key, **`lila_query`** fails unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev-only server fallback).
+
+### External agent checklist (read this first)
+
+These steps apply to **you** (the MCP runtime / operator machine), **not** the LILA HTTP API deployment.
+
+1. **Where env lives:** OpenClaw **`mcp.servers.<name>.env`** (or shell env when running `npm run mcp`). **Never** put `LILA_PAYER_SECRET` on the public API server to “fix” MCP — that is the wrong process.
+2. **Template (copy variable names from here):** [`config/mcp-client.env.example`](https://github.com/nrlartt/lila-agent/blob/main/config/mcp-client.env.example) in the repo.
+3. **Required for paid `lila_query`:** set **`LILA_BASE_URL`** (e.g. **`https://lilagent.xyz`**, no trailing slash) and **one** payer option:
+   - **`LILA_PAYER_SECRET`** = Stellar secret `S...`, or
+   - **`LILA_PAYER_SECRET_FILE`** = path to a file containing the secret, or
+   - **`LILA_AUTO_CREATE_PAYER_WALLET=true`** = auto-create a key on first MCP start (saved under **`~/.openclaw/lila-payer.secret`** — **fund USDC + XLM** on the same network).
+4. **Match network:** **`STELLAR_NETWORK`** and **`STELLAR_RPC_URL`** must match the API (see `lila_services` / `GET /api/services`).
+5. **After changing env:** restart the OpenClaw gateway (or MCP host) so the process reloads variables.
+6. **Tool order:** **`lila_services`** (read **`mcpClient`**) → **`lila_payer_status`** (confirm **G** address) → **`lila_query`**.
 
 ---
 
@@ -114,6 +128,7 @@ User request about LILA / paid AI / Stellar x402
 
 - **Site docs:** `https://lilagent.xyz/docs`
 - **Repo:** `https://github.com/nrlartt/lila-agent`
+- **MCP client env template (external agent):** [`config/mcp-client.env.example`](https://github.com/nrlartt/lila-agent/blob/main/config/mcp-client.env.example)
 - **OpenClaw MCP:** [`docs/openclaw-mcp.md`](https://github.com/nrlartt/lila-agent/blob/main/docs/openclaw-mcp.md)
 
 ---
