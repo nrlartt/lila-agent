@@ -12,6 +12,15 @@ Load order: `.env` at the repository root (see `server/index.js` and Vite for cl
 | `FACILITATOR_URL` | Defaulted | x402 facilitator HTTP endpoint |
 | `STELLAR_RPC_URL` | Defaulted | Soroban / Horizon RPC |
 
+### Optional: MPP Charge (parallel to x402)
+
+| Variable | Description |
+|----------|-------------|
+| `MPP_ENABLED` | Set `true` to expose **`/api/mpp/premium/*`** with [MPP Charge](https://developers.stellar.org/docs/build/agentic-payments/mpp) (Soroban SAC `transfer`, no x402 facilitator). |
+| `MPP_SECRET_KEY` | Random secret for MPP challenge binding (HMAC). **Not** a Stellar key. |
+
+Requires `STELLAR_PAY_TO` (recipient) and the same `STELLAR_NETWORK` / `STELLAR_RPC_URL` as the rest of the app. Existing **`/api/premium/*`** x402 routes are unchanged.
+
 ## Server
 
 | Variable | Description |

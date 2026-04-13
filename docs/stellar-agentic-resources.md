@@ -54,4 +54,4 @@ Freighter (browser), Albedo, Hana, HOT, Klever, OneKey. See [Stellar x402 docs](
 - [MPP protocol](https://mpp.dev)
 - [Stripe machine payments](https://stripe.com/blog/machine-payments-protocol) · [Stripe MPP docs](https://docs.stripe.com/payments/machine)
 
-LILA’s own MCP bridge is documented in [OpenClaw & MCP](openclaw-mcp.md).
+LILA's own MCP bridge is documented in [OpenClaw & MCP](openclaw-mcp.md).

@@ -13,11 +13,13 @@ That URL is the **full** specification: when to activate, MCP tool contracts, `l
 
 | Tool | Role |
 |------|------|
-| `lila_services` | `GET /api/services`: prices, `network`, `llmReady`, x402 flags |
+| `lila_services` | `GET /api/services`: prices, `network`, `llmReady`, x402 flags, **`integrationHints`**, **`mppCharge`** |
 | `lila_health` | `GET /api/health`: liveness |
 | `lila_query` | `POST /api/agent/query`: body `{ "service": "chat"\|"analyze"\|"code"\|"research", "input": "..." }` |
 
 **Env:** `LILA_BASE_URL=https://lilagent.xyz` (no trailing slash). **Repo:** [nrlartt/lila-agent](https://github.com/nrlartt/lila-agent). **MCP config:** `config/openclaw-lila.mcp.example.json`.
+
+**MPP Charge** (`POST /api/mpp/premium/*`): for **external** HTTP clients with their **own** Stellar key (`@stellar/mpp/charge/client`). **Not** the default MCP path; use **`lila_query`** for OpenClaw. See canonical [skill.md](https://lilagent.xyz/skill.md) payment table.
 
 ## OpenClaw
 

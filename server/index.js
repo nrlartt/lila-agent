@@ -12,6 +12,7 @@ import {
 } from "./agentClient.js";
 import { setupLLM, generateAIResponse, getProvider } from "./llm.js";
 import { rateLimitPremium } from "./rateLimit.js";
+import { registerMppChargeRoutes } from "./mppChargeRoutes.js";
 
 dotenv.config({
   path: fileURLToPath(new URL("../.env", import.meta.url)),
@@ -55,6 +56,11 @@ const EXPLORER_BASE =
     ? "https://stellar.expert/explorer/testnet/tx/"
     : "https://stellar.expert/explorer/public/tx/";
 
+const MPP_ENABLED = process.env.MPP_ENABLED === "true" || process.env.MPP_ENABLED === "1";
+const MPP_SECRET_KEY = process.env.MPP_SECRET_KEY || "";
+
+let mppChargeActive = false;
+
 const corsOrigin =
   process.env.NODE_ENV !== "production"
     ? true
@@ -71,7 +77,7 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 
 app.use((req, res, next) => {
-  if (req.path.startsWith("/api/premium")) {
+  if (req.path.startsWith("/api/premium") || req.path.startsWith("/api/mpp")) {
     return rateLimitPremium(req, res, next);
   }
   next();
@@ -182,6 +188,34 @@ app.get("/api/services", (_req, res) => {
     x402Server: x402Active,
     x402Agent: isAgentReady(),
     userPaysWithWallet: x402Active,
+    mppCharge: mppChargeActive,
+    mppPremiumBase: mppChargeActive ? "/api/mpp/premium" : null,
+    /** Helps autonomous agents pick the right HTTP integration (see public/skill.md). */
+    integrationHints: {
+      websiteTerminal: {
+        protocol: "x402",
+        description: "Browser + Freighter; user signs each paid call.",
+        paths: ["POST /api/premium/chat", "POST /api/premium/analyze", "POST /api/premium/code", "POST /api/premium/research"],
+      },
+      mcpLilaQuery: {
+        protocol: "x402",
+        description: "MCP tools lila_query -> POST /api/agent/query; payment from operator server wallet when STELLAR_AGENT_SECRET is set, not from chat user wallet.",
+        paths: ["POST /api/agent/query"],
+      },
+      externalAgentMpp: {
+        protocol: "mpp-charge",
+        description:
+          "For integrations that hold their own Stellar key and pay per request without MCP lila_query. Only when mppCharge is true. Use @stellar/mpp/charge/client, not @x402/fetch.",
+        paths: mppChargeActive
+          ? [
+              "POST /api/mpp/premium/chat",
+              "POST /api/mpp/premium/analyze",
+              "POST /api/mpp/premium/code",
+              "POST /api/mpp/premium/research",
+            ]
+          : [],
+      },
+    },
     llmReady: llm !== "static",
     services: [
       { id: "chat", name: "Neural Chat", price: "$0.001", description: "Conversation with LILA" },
@@ -411,6 +445,17 @@ Stellar is uniquely positioned as the payment
 backbone of the agentic economy.`;
 }
 
+const mppResult = registerMppChargeRoutes(app, {
+  enabled: MPP_ENABLED,
+  secretKey: MPP_SECRET_KEY,
+  recipient: PAY_TO,
+  network: NETWORK,
+  rpcUrl: RPC_URL,
+  generateAIResponse,
+  generateResponse,
+});
+mppChargeActive = mppResult.mppChargeActive;
+
 // ──────────────────────────────────────────────
 //  SPA FALLBACK
 // ──────────────────────────────────────────────
@@ -448,6 +493,7 @@ app.listen(Number(PORT), () => {
   Server:       http://localhost:${PORT}
   Network:      ${NETWORK}
   x402:         ${x402Active ? "ON" : "OFF"}
+  MPP Charge:   ${mppChargeActive ? "ON (/api/mpp/premium/*)" : "OFF"}
   LLM:          ${getProvider() !== "static" ? "ON" : "OFF"}
   Server agent: ${isAgentReady() ? "configured" : "off"}
   `);

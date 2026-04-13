@@ -8,7 +8,19 @@
 
 ## 1. What you are connecting to
 
-**LILA** is a neural terminal stack: paid AI services (**chat**, **analyze**, **code**, **research**) settled on **Stellar** via **x402** (HTTP 402 + Soroban + USDC). The public site and API live at **`https://lilagent.xyz`**.
+**LILA** is a neural terminal stack: paid AI services (**chat**, **analyze**, **code**, **research**) settled on **Stellar**. The public site and API live at **`https://lilagent.xyz`**.
+
+### Payment paths (pick one; do not confuse them)
+
+| Who pays | How you integrate | Protocol / endpoints |
+|----------|-------------------|----------------------|
+| **End user in the browser** (website terminal) | Freighter + x402 client | **x402** on `POST /api/premium/*` |
+| **Operator’s server** (OpenClaw / MCP default) | MCP tools `lila_services`, `lila_query` | **x402** on `POST /api/agent/query`; cost is the **server agent wallet** when configured, **not** the chat user’s wallet |
+| **External autonomous agent or backend** that has **its own Stellar wallet** and should pay **per HTTP call** without using MCP `lila_query` | Direct HTTP from your process with a funded keypair | **MPP Charge** (Soroban SAC) on `POST /api/mpp/premium/*` **only if** `GET /api/services` reports `mppCharge: true`. Use **`@stellar/mpp/charge/client`**, not `@x402/fetch`. Same JSON bodies and prices as x402 premium routes. |
+
+**Important:** **MPP** is for **external** integrations that implement the MPP client and sign with **their** key. It is **not** the same as **`lila_query`**. If you only use MCP tools, keep using **`lila_query`**; you do **not** need MPP unless you are building a separate HTTP client that pays from its own wallet.
+
+`GET /api/services` returns `integrationHints` and flags (`x402Server`, `mppCharge`, `x402Agent`) so you can branch at runtime.
 
 You typically interact through the **MCP stdio server** in the [`lila-agent`](https://github.com/nrlartt/lila-agent) repository (`npm run mcp`), which calls LILA’s HTTP endpoints. You are **not** the end-user’s browser wallet; **`lila_query`** uses the **operator’s server agent wallet** when x402 is enabled.
 
@@ -79,11 +91,12 @@ User request about LILA / paid AI / Stellar x402
 ## 6. Behavior rules (must follow)
 
 1. **Truthfulness:** Do not invent Stellar addresses, transaction hashes, block heights, “live” prices, or wallet balances. Treat **tool output** as authoritative; if a field is missing, say so.
-2. **Costs:** When `x402Server` / payment info is present, acknowledge that requests may incur **USDC** cost borne by the **server agent** (not the chat user’s Freighter). Do not promise free mainnet spend.
-3. **No Freighter in MCP path:** The MCP **`lila_query`** path does **not** use the end-user’s browser wallet. Do not instruct the user to “sign in Freighter” for MCP tool calls unless you are describing the **website terminal** flow separately.
-4. **Errors:** If a tool returns non-2xx or error JSON, surface a concise explanation to the user and **do not** fabricate a successful LILA response.
-5. **Rate limits:** Premium routes may be rate-limited per IP; if you receive 429 or similar, backoff and inform the user.
-6. **Privacy:** Do not exfiltrate secrets from tool responses into public channels; redact keys if echoing logs.
+2. **Costs (MCP):** For **`lila_query`**, when `x402Server` / payment info is present, acknowledge **USDC** may be spent from the **server agent** (not the chat user’s Freighter).
+3. **Costs (MPP):** **MPP** (`/api/mpp/premium/*`) is only for **external** clients with their **own** Stellar signer; do not describe MPP to users who only use MCP **`lila_query`**. If `mppCharge` is false, MPP is off.
+4. **No Freighter in MCP path:** The MCP **`lila_query`** path does **not** use the end-user’s browser wallet. Do not instruct the user to “sign in Freighter” for MCP tool calls unless you are describing the **website terminal** flow separately.
+5. **Errors:** If a tool returns non-2xx or error JSON, surface a concise explanation to the user and **do not** fabricate a successful LILA response.
+6. **Rate limits:** Premium routes may be rate-limited per IP; if you receive 429 or similar, backoff and inform the user.
+7. **Privacy:** Do not exfiltrate secrets from tool responses into public channels; redact keys if echoing logs.
 
 ---
 
