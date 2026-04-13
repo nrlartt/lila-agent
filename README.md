@@ -74,7 +74,7 @@ See **`.env.example`** for all variables (Stellar network, pay-to address, facil
 | `GET /api/health` | Liveness: uptime; `llmReady` = remote inference available (boolean). |
 | `POST /api/premium/*` | Paid AI endpoints (chat, analyze, code, research). |
 | `POST /api/agent/query` | Optional MCP fallback when **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** and no **`LILA_PAYER_SECRET`**: server agent or demo. |
-| `npm run mcp` | MCP: **`lila_query`** requires **`LILA_PAYER_SECRET`** ( **`/api/premium/*`** ). See [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [Skill](skills/lila-openclaw/SKILL.md), [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
+| `npm run mcp` | **External agent** process only. Env template: [config/mcp-client.env.example](config/mcp-client.env.example). Docs: [docs/openclaw-mcp.md](docs/openclaw-mcp.md), [Skill](skills/lila-openclaw/SKILL.md), [config/openclaw-lila.mcp.example.json](config/openclaw-lila.mcp.example.json). |
 | SPA `/` | Marketing / lab-style landing (hero + sections). |
 | SPA `/docs` | Technical documentation (API, env, MCP, deployment). |
 | SPA `/terminal` | Full-height terminal UI. |

@@ -54,7 +54,7 @@ console.log("\n[lila] Register MCP (restart OpenClaw gateway after):\n");
 console.log(`openclaw mcp set lila ${JSON.stringify(json)}`);
 console.log("\n[lila] LILA_BASE_URL for this fragment:", baseUrl);
 console.log(
-  "[lila] Add LILA_PAYER_SECRET to OpenClaw mcp.servers.lila.env so lila_query pays from your wallet (merge into the JSON above).\n"
+  "[lila] External-agent env template: config/mcp-client.env.example — merge into OpenClaw mcp.servers.lila.env.\n"
 );
 console.log(
   "[lila] API server: STELLAR_PAY_TO etc. on Railway; dev-only fallback: LILA_ALLOW_SERVER_AGENT_QUERY=true.\n"

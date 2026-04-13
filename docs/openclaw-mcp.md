@@ -2,6 +2,8 @@
 
 Browser demos such as [MPP Chat Demo](https://mpp.stellar.buzz/) attach a wallet session in-page before chat. MCP has no browser wallet: use **`LILA_PAYER_SECRET`**, **`LILA_PAYER_SECRET_FILE`**, or opt-in **`LILA_AUTO_CREATE_PAYER_WALLET=true`** (writes `~/.openclaw/lila-payer.secret` on first run — fund USDC on testnet).
 
+**External agent env only:** automatic wallet bootstrap runs in **`mcp/lila-server.mjs`** (OpenClaw / local `npm run mcp`), **not** in the LILA API server process. Copy variables from **[`config/mcp-client.env.example`](../config/mcp-client.env.example)** into **`mcp.servers.*.env`** — do not add them to Railway or the repo root `.env` unless you also run MCP on that same machine.
+
 This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server**. **`lila_query`** **requires** **`LILA_PAYER_SECRET`** in the MCP `env` to pay via **x402** on **`POST /api/premium/*`**. Without it, **`lila_query`** returns an error unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (local dev only), which allows **`POST /api/agent/query`** (server **`STELLAR_AGENT_SECRET`** or demo).
 
 **Production API origin:** **`https://lilagent.xyz`** (no path prefix). Other agents should use this as **`LILA_BASE_URL`** when calling the MCP-backed HTTP API.

@@ -34,11 +34,14 @@ Requires `STELLAR_PAY_TO` (recipient) and the same `STELLAR_NETWORK` / `STELLAR_
 
 ## MCP & remote agents (OpenClaw, Cursor, Claude Code)
 
+**Payer wallet and automatic key creation apply only to the external MCP process** — not the HTTP API server. Template: **[`config/mcp-client.env.example`](../config/mcp-client.env.example)**.
+
 | Variable | Description |
 |----------|-------------|
-| `LILA_PUBLIC_URL` | Public HTTPS base URL (no trailing slash). Production: **`https://lilagent.xyz`**. Remote agents set MCP `env.LILA_BASE_URL` to this value. |
-| `LILA_BASE_URL` | Base URL for `npm run mcp` (stdio MCP) to reach `/api/services`, `/api/health`, `/api/agent/query` (default `http://127.0.0.1:$PORT`). |
-| `LILA_DOTENV_PATH` | Optional absolute path to `.env` if the MCP process is started with `cwd` outside the repo. |
+| `LILA_PUBLIC_URL` | On the **API server**: public HTTPS base (no trailing slash). MCP clients use **`LILA_BASE_URL`** instead for HTTP calls. |
+| `LILA_BASE_URL` | **MCP process only.** Base URL to reach `/api/services`, `/api/premium/*`, etc. (default `http://127.0.0.1:$PORT`). |
+| `LILA_PAYER_SECRET`, `LILA_PAYER_SECRET_FILE`, `LILA_AUTO_CREATE_PAYER_WALLET`, `LILA_ALLOW_SERVER_AGENT_QUERY` | **MCP process only.** See template file. |
+| `LILA_DOTENV_PATH` | Optional absolute path to an env file for the **MCP** process if `cwd` is outside the repo. |
 
 See [OpenClaw & MCP](openclaw-mcp.md) and [Stellar agentic resources](stellar-agentic-resources.md).
 

@@ -1,4 +1,5 @@
 /**
+ * External-agent only: imported from mcp/lila-server.mjs (never from server/index.js).
  * Optional: load or auto-create a Stellar payer key for MCP (like browser demos that
  * attach a wallet before chat). Secrets never go to stdout — only stderr notices.
  */
