@@ -1,6 +1,6 @@
 # OpenClaw, Stellar x402, and LILA MCP
 
-This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server** that calls your HTTP API, especially **`POST /api/agent/query`**, which uses **`STELLAR_AGENT_SECRET`** to settle **x402** on Stellar when configured.
+This project exposes LILA to **any MCP client** (including [OpenClaw](https://docs.openclaw.ai/)) via a **stdio MCP server**. **`lila_query`** uses **`LILA_PAYER_SECRET`** (your Stellar secret in the MCP `env`) to pay via **x402** on **`POST /api/premium/*`**. If **`LILA_PAYER_SECRET`** is unset, it falls back to **`POST /api/agent/query`** (demo or the API server’s **`STELLAR_AGENT_SECRET`**).
 
 **Production API origin:** **`https://lilagent.xyz`** (no path prefix). Other agents should use this as **`LILA_BASE_URL`** when calling the MCP-backed HTTP API.
 
@@ -9,7 +9,7 @@ For background on x402, MPP, and Stellar tooling, see [Stellar agentic resources
 ## What you need on the LILA side
 
 1. **LILA HTTP server** running (`npm run dev:server` or `npm start`).
-2. **Stellar**: `STELLAR_PAY_TO`, `STELLAR_AGENT_SECRET`, funded agent wallet (USDC + XLM for fees) on the chosen network. See [Environment](environment.md).
+2. **Stellar (API server):** `STELLAR_PAY_TO` and facilitator settings so **`/api/premium/*`** can settle x402. For **OpenClaw paying from your wallet**, add **`LILA_PAYER_SECRET`** to the MCP process (funded with USDC + XLM). Server **`STELLAR_AGENT_SECRET`** is only needed for the **`/api/agent/query`** fallback when MCP does not set **`LILA_PAYER_SECRET`**. See [Environment](environment.md).
 3. **Env on the server:** `LILA_PUBLIC_URL=https://lilagent.xyz` (and `CORS_ORIGIN` including `https://lilagent.xyz`).
 
 ## MCP server (stdio)
@@ -49,7 +49,7 @@ OpenClaw stores outbound MCP definitions under **`mcp.servers`** in `~/.openclaw
 | `command` | Executable (e.g. `node`) |
 | `args` | Arguments (e.g. `mcp/lila-server.mjs`) |
 | `cwd` / `workingDirectory` | **Repository root** (where `node_modules` exists) |
-| `env` | **`LILA_BASE_URL`**: `https://lilagent.xyz` for production, or `http://127.0.0.1:3001` for local API |
+| `env` | **`LILA_BASE_URL`**: `https://lilagent.xyz` (or `http://127.0.0.1:3001` locally). **`LILA_PAYER_SECRET`**: your Stellar secret so **`lila_query`** pays via x402 (recommended). Optional: **`STELLAR_NETWORK`**, **`STELLAR_RPC_URL`** to match the deployment. |
 
 ### Example fragment
 
@@ -61,7 +61,7 @@ Copy and merge **`config/openclaw-lila.mcp.example.json`** into your OpenClaw co
 ### CLI (alternative)
 
 ```bash
-openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/ABS/PATH/TO/lilagent","env":{"LILA_BASE_URL":"https://lilagent.xyz"}}'
+openclaw mcp set lila '{"command":"node","args":["mcp/lila-server.mjs"],"cwd":"/ABS/PATH/TO/lilagent","env":{"LILA_BASE_URL":"https://lilagent.xyz","LILA_PAYER_SECRET":"YOUR_S_SECRET"}}'
 ```
 
 For local development only:

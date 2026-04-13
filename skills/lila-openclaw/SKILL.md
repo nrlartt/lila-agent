@@ -15,11 +15,11 @@ That URL is the **full** specification: when to activate, MCP tool contracts, `l
 |------|------|
 | `lila_services` | `GET /api/services`: prices, `network`, `llmReady`, x402 flags, **`integrationHints`**, **`mppCharge`** |
 | `lila_health` | `GET /api/health`: liveness |
-| `lila_query` | `POST /api/agent/query`: body `{ "service": "chat"\|"analyze"\|"code"\|"research", "input": "..." }` |
+| `lila_query` | With **`LILA_PAYER_SECRET`**: x402 on `POST /api/premium/*` (your wallet). Without it: `POST /api/agent/query`. Body: `{ "service": "chat"\|"analyze"\|"code"\|"research", "input": "..." }` |
 
-**Env:** `LILA_BASE_URL=https://lilagent.xyz` (no trailing slash). **Repo:** [nrlartt/lila-agent](https://github.com/nrlartt/lila-agent). **MCP config:** `config/openclaw-lila.mcp.example.json`.
+**Env:** `LILA_BASE_URL=https://lilagent.xyz` (no trailing slash); **`LILA_PAYER_SECRET`** + **`STELLAR_NETWORK`** / **`STELLAR_RPC_URL`** for paid calls from **your** wallet. **Repo:** [nrlartt/lila-agent](https://github.com/nrlartt/lila-agent). **MCP config:** `config/openclaw-lila.mcp.example.json`.
 
-**MPP Charge** (`POST /api/mpp/premium/*`): for **external** HTTP clients with their **own** Stellar key (`@stellar/mpp/charge/client`). **Not** the default MCP path; use **`lila_query`** for OpenClaw. See canonical [skill.md](https://lilagent.xyz/skill.md) payment table.
+**MPP Charge** (`POST /api/mpp/premium/*`): for **non-MCP** HTTP clients (`@stellar/mpp/charge/client`). OpenClaw should prefer **`lila_query`** + **`LILA_PAYER_SECRET`**. See canonical [skill.md](https://lilagent.xyz/skill.md) payment table.
 
 ## OpenClaw
 

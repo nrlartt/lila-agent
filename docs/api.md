@@ -27,7 +27,7 @@ Metadata for the UI and clients. No secrets.
   "mppPremiumBase": null,
   "integrationHints": {
     "websiteTerminal": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/chat", "..."] },
-    "mcpLilaQuery": { "protocol": "x402", "description": "...", "paths": ["POST /api/agent/query"] },
+    "mcpLilaQuery": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/...", "POST /api/agent/query"] },
     "externalAgentMpp": { "protocol": "mpp-charge", "description": "...", "paths": [] }
   },
   "llmReady": true,
@@ -94,7 +94,7 @@ When `MPP_ENABLED` is set, parallel routes use **MPP Charge** (Soroban SAC, `@st
 
 ## MCP bridge (optional)
 
-External MCP clients (OpenClaw, Cursor, …) can use the repository **`npm run mcp`** stdio server, which calls `/api/services`, `/api/health`, and `/api/agent/query`. Register the server in OpenClaw via **`mcp.servers`** ([OpenClaw `mcp` CLI](https://docs.openclaw.ai/cli/mcp)); example fragment: [config/openclaw-lila.mcp.example.json](../config/openclaw-lila.mcp.example.json). Stellar / x402 links: [Stellar agentic resources](stellar-agentic-resources.md).
+External MCP clients (OpenClaw, Cursor, …) can use the repository **`npm run mcp`** stdio server, which calls `/api/services` and `/api/health`. **`lila_query`** uses **`LILA_PAYER_SECRET`** to pay via x402 on **`POST /api/premium/*`** (recommended); if that env var is unset, it falls back to **`/api/agent/query`**. Register the server in OpenClaw via **`mcp.servers`** ([OpenClaw `mcp` CLI](https://docs.openclaw.ai/cli/mcp)); example fragment: [config/openclaw-lila.mcp.example.json](../config/openclaw-lila.mcp.example.json). Stellar / x402 links: [Stellar agentic resources](stellar-agentic-resources.md).
 
 ## Agent (optional)
 

@@ -199,8 +199,15 @@ app.get("/api/services", (_req, res) => {
       },
       mcpLilaQuery: {
         protocol: "x402",
-        description: "MCP tools lila_query -> POST /api/agent/query; payment from operator server wallet when STELLAR_AGENT_SECRET is set, not from chat user wallet.",
-        paths: ["POST /api/agent/query"],
+        description:
+          "MCP lila_query: set LILA_PAYER_SECRET in the MCP env to pay from the operator wallet on POST /api/premium/*; if unset, falls back to POST /api/agent/query (server agent or demo).",
+        paths: [
+          "POST /api/premium/chat",
+          "POST /api/premium/analyze",
+          "POST /api/premium/code",
+          "POST /api/premium/research",
+          "POST /api/agent/query",
+        ],
       },
       externalAgentMpp: {
         protocol: "mpp-charge",
