@@ -34,7 +34,8 @@ These steps apply to **you** (the MCP runtime / operator machine), **not** the L
 3. **Required for paid `lila_query`:** set **`LILA_BASE_URL`** (e.g. **`https://lilagent.xyz`**, no trailing slash) and **one** payer option:
    - **`LILA_PAYER_SECRET`** = Stellar secret `S...`, or
    - **`LILA_PAYER_SECRET_FILE`** = path to a file containing the secret, or
-   - **`LILA_AUTO_CREATE_PAYER_WALLET=true`** = auto-create a key on first MCP start (saved under **`~/.openclaw/lila-payer.secret`** — **fund USDC + XLM** on the same network).
+   - **`LILA_AUTO_CREATE_PAYER_WALLET=true`** = auto-create a key on first MCP start (saved under **`~/.openclaw/lila-payer.secret`**).
+   - **`LILA_AUTO_SETUP_TESTNET_PAYER=true`** (**`stellar:testnet` only**) = on MCP start, **Friendbot** (XLM) + **USDC trustline** automatically; you still add **USDC** via [Circle testnet faucet](https://faucet.circle.com).
 4. **Match network:** **`STELLAR_NETWORK`** and **`STELLAR_RPC_URL`** must match the API (see `lila_services` / `GET /api/services`).
 5. **After changing env:** restart the OpenClaw gateway (or MCP host) so the process reloads variables.
 6. **Tool order:** **`lila_services`** (read **`mcpClient`**) → **`lila_payer_status`** (confirm **G** address) → **`lila_query`**.
