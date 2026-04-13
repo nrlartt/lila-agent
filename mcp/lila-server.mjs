@@ -46,6 +46,42 @@ function jsonResult(obj) {
   return textResult(JSON.stringify(obj, null, 2));
 }
 
+/** Whether LILA_PAYER_SECRET is set; if so, public G address only (never the secret). */
+async function getPayerStatus() {
+  const secret = process.env.LILA_PAYER_SECRET?.trim();
+  if (!secret) {
+    return {
+      externalPayerConfigured: false,
+      payerPublicKey: null,
+      lilaQueryPayment: "server",
+      lilaQueryHttp: "POST /api/agent/query (uses API server STELLAR_AGENT_SECRET or demo)",
+      network: NETWORK,
+      hint: "Set LILA_PAYER_SECRET in this MCP process env (e.g. OpenClaw mcp.servers.lila.env) so lila_query pays from YOUR wallet on POST /api/premium/*.",
+    };
+  }
+  try {
+    const { Keypair } = await import("@stellar/stellar-sdk");
+    const kp = Keypair.fromSecret(secret);
+    return {
+      externalPayerConfigured: true,
+      payerPublicKey: kp.publicKey(),
+      lilaQueryPayment: "external_wallet",
+      lilaQueryHttp: "POST /api/premium/* (x402 signed by LILA_PAYER_SECRET)",
+      network: NETWORK,
+    };
+  } catch (err) {
+    return {
+      externalPayerConfigured: false,
+      payerPublicKey: null,
+      lilaQueryPayment: "server",
+      lilaQueryHttp: "POST /api/agent/query (fallback; invalid LILA_PAYER_SECRET)",
+      network: NETWORK,
+      error: "LILA_PAYER_SECRET is set but not a valid Stellar secret key.",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
 async function httpJson(method, url, body) {
   const opts = { method, headers: { Accept: "application/json" } };
   if (body !== undefined) {
@@ -148,6 +184,7 @@ const server = new McpServer(
       "If LILA_PAYER_SECRET is unset, lila_query uses POST /api/agent/query (demo or server agent wallet).",
       "Production API: LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" + PORT + " locally).",
       "Match STELLAR_NETWORK and STELLAR_RPC_URL to the deployment (testnet vs mainnet).",
+      "Tool lila_payer_status: shows whether LILA_PAYER_SECRET is active and the payer G address (no secrets).",
     ].join(" "),
   },
 );
@@ -178,6 +215,17 @@ server.registerTool(
       return jsonResult({ error: "Request failed", status, body: data });
     }
     return jsonResult(data);
+  },
+);
+
+server.registerTool(
+  "lila_payer_status",
+  {
+    description:
+      "MCP-only: whether LILA_PAYER_SECRET is set. If yes, shows payer public address and that lila_query uses /api/premium/*. If no, lila_query uses /api/agent/query (server wallet). Never exposes the secret.",
+  },
+  async () => {
+    return jsonResult(await getPayerStatus());
   },
 );
 

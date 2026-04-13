@@ -20,7 +20,7 @@ From the repository root (after `npm install`):
 npm run mcp
 ```
 
-Tools: `lila_services`, `lila_health`, `lila_query` (see [API](api.md)).
+Tools: `lila_services`, `lila_health`, `lila_payer_status` (whether `LILA_PAYER_SECRET` is active), `lila_query` (see [API](api.md)).
 
 On a machine that talks to **production**, set before starting the MCP process:
 
@@ -88,7 +88,7 @@ This copies **`skills/lila-openclaw`** to **`~/.openclaw/skills/lila-openclaw`**
 
 | Layer | Required? | Role |
 |-------|-----------|------|
-| **MCP server** (`npm run mcp` + `mcp.servers` in OpenClaw) | **Yes** for tool calls | Registers `lila_services`, `lila_health`, `lila_query` so the gateway can spawn the process and expose tools. |
+| **MCP server** (`npm run mcp` + `mcp.servers` in OpenClaw) | **Yes** for tool calls | Registers `lila_services`, `lila_health`, `lila_payer_status`, `lila_query` so the gateway can spawn the process and expose tools. |
 | **Skill** (`SKILL.md`) | **No**, but **recommended** | Teaches the model *when* to use LILA (x402, Stellar, paid AI) and *how* to sequence tools. Without a skill, tools may still appear in context if MCP is wired, but behavior is less consistent. |
 
 This repo ships an optional skill: **`skills/lila-openclaw/SKILL.md`**. Install it per [Creating Skills](https://docs.openclaw.ai/tools/creating-skills) (e.g. copy the folder to `~/.openclaw/skills/lila-openclaw` or your workspace skills path) and restart the gateway.

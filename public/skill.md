@@ -54,6 +54,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 |------|------|--------|-------------|
 | `lila_services` | `GET /api/services` | none | First call to learn prices, `network`, `llmReady`, `x402Server`, `x402Agent`. |
 | `lila_health` | `GET /api/health` | none | Liveness only; uptime and `llmReady`. |
+| `lila_payer_status` | *(MCP local; no HTTP)* | none | Shows whether **`LILA_PAYER_SECRET`** is active and the payer **G** address. If inactive, **`lila_query`** still uses **`/api/agent/query`** (server wallet). |
 | `lila_query` | `POST /api/premium/*` if **`LILA_PAYER_SECRET`** is set; else `POST /api/agent/query` | JSON: `service`, `input` | All paid AI work routed through LILA. Prefer **`LILA_PAYER_SECRET`** so **you** pay via x402. |
 
 Tool names in your runtime may be **prefixed** (e.g. `lila_lila_query`). Use the tools list returned by the host.
