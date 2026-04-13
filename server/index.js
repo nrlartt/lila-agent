@@ -15,6 +15,11 @@ import { rateLimitPremium } from "./rateLimit.js";
 import { registerMppChargeRoutes } from "./mppChargeRoutes.js";
 import { buildCatalog } from "./catalog.js";
 import { ALLOWED_SERVICES, BODY_KEY_MAP, PRICE_MAP } from "./serviceRegistry.js";
+import {
+  buildPremiumAccepts,
+  getXlmUsdRateForApi,
+  isXlmPaymentOptionEnabled,
+} from "./x402PremiumAccepts.js";
 
 dotenv.config({
   path: fileURLToPath(new URL("../.env", import.meta.url)),
@@ -129,54 +134,12 @@ async function setupX402Server() {
 
     x402Mw = paymentMiddlewareFromConfig(
       {
-        "POST /api/premium/chat": {
-          accepts: {
-            scheme: "exact",
-            price: "$0.001",
-            network: NETWORK,
-            payTo: PAY_TO,
-          },
-        },
-        "POST /api/premium/analyze": {
-          accepts: {
-            scheme: "exact",
-            price: "$0.01",
-            network: NETWORK,
-            payTo: PAY_TO,
-          },
-        },
-        "POST /api/premium/code": {
-          accepts: {
-            scheme: "exact",
-            price: "$0.005",
-            network: NETWORK,
-            payTo: PAY_TO,
-          },
-        },
-        "POST /api/premium/research": {
-          accepts: {
-            scheme: "exact",
-            price: "$0.02",
-            network: NETWORK,
-            payTo: PAY_TO,
-          },
-        },
-        "POST /api/premium/strategy": {
-          accepts: {
-            scheme: "exact",
-            price: "$0.012",
-            network: NETWORK,
-            payTo: PAY_TO,
-          },
-        },
-        "POST /api/premium/blueprint": {
-          accepts: {
-            scheme: "exact",
-            price: "$0.008",
-            network: NETWORK,
-            payTo: PAY_TO,
-          },
-        },
+        "POST /api/premium/chat": buildPremiumAccepts(NETWORK, PAY_TO, "$0.001"),
+        "POST /api/premium/analyze": buildPremiumAccepts(NETWORK, PAY_TO, "$0.01"),
+        "POST /api/premium/code": buildPremiumAccepts(NETWORK, PAY_TO, "$0.005"),
+        "POST /api/premium/research": buildPremiumAccepts(NETWORK, PAY_TO, "$0.02"),
+        "POST /api/premium/strategy": buildPremiumAccepts(NETWORK, PAY_TO, "$0.012"),
+        "POST /api/premium/blueprint": buildPremiumAccepts(NETWORK, PAY_TO, "$0.008"),
       },
       new HTTPFacilitatorClient({ url: FACILITATOR_URL }),
       [{ network: NETWORK, server: new ExactStellarScheme() }],
@@ -184,6 +147,11 @@ async function setupX402Server() {
 
     x402Active = true;
     console.log("[SERVER] x402 middleware active; premium endpoints protected");
+    if (isXlmPaymentOptionEnabled()) {
+      console.log(
+        `[SERVER] x402: optional XLM settlement enabled (notional ${getXlmUsdRateForApi()} USD per 1 XLM for amount derivation; disable with LILA_X402_ENABLE_XLM=false)`,
+      );
+    }
   } catch (err) {
     console.warn("[SERVER] x402 middleware setup failed:", err.message);
   }
@@ -210,11 +178,17 @@ app.get("/api/services", (_req, res) => {
     userPaysWithWallet: x402Active,
     mppCharge: mppChargeActive,
     mppPremiumBase: mppChargeActive ? "/api/mpp/premium" : null,
+    /** x402 accepts USDC first; optional second option is native XLM (SAC / SEP-41). Browser client still defaults to USDC. */
+    paymentAssets: isXlmPaymentOptionEnabled() ? ["USDC", "XLM"] : ["USDC"],
+    x402DefaultAsset: "USDC",
+    xlmPaymentOptionEnabled: isXlmPaymentOptionEnabled(),
+    xlmUsdRate: getXlmUsdRateForApi(),
     /** Helps autonomous agents pick the right HTTP integration (see public/skill.md). */
     integrationHints: {
       websiteTerminal: {
         protocol: "x402",
-        description: "Browser + Freighter; user signs each paid call.",
+        description:
+          "Browser + Freighter; user signs each paid call. Settlement: USDC (default) or XLM via native Stellar Asset Contract when enabled.",
         paths: [
           "POST /api/premium/chat",
           "POST /api/premium/analyze",
@@ -290,6 +264,8 @@ app.get("/api/catalog", (req, res) => {
       llmReady: getProvider() !== "static",
       version: "4.0",
       port: PORT,
+      paymentAssets: isXlmPaymentOptionEnabled() ? ["USDC", "XLM"] : ["USDC"],
+      xlmUsdRate: getXlmUsdRateForApi(),
     }),
   );
 });

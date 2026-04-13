@@ -453,8 +453,8 @@ export default function HomePage() {
                   </div>
                   <h3>x402 micropayments</h3>
                   <p>
-                    HTTP 402 challenges, user-signed settlement, and per-request pricing in USDC, matching the x402
-                    flow on Stellar.
+                    HTTP 402 challenges, user-signed settlement, and per-request pricing in USDC (default) or native
+                    XLM via the Stellar Asset Contract — same x402 flow on Stellar.
                   </p>
                 </div>
                 <p className="home-card-meta">Per-call billing</p>
@@ -526,7 +526,7 @@ export default function HomePage() {
               </div>
               <div className="home-flow-step">
                 <span>02</span>
-                <p>Freighter signs the x402 payload; USDC moves on Stellar.</p>
+                <p>Freighter signs the x402 payload; USDC or XLM settles on Stellar.</p>
               </div>
               <div className="home-flow-step">
                 <span>03</span>

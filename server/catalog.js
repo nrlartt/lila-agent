@@ -16,7 +16,10 @@ const SERVICE_LINES = {
     description:
       "General-purpose conversational AI with Stellar/x402 context. Intended for terminal sessions and MCP-backed workflows.",
     audience: "Terminal users, OpenClaw agents, HTTP clients with x402 or MPP",
-    highlights: ["Per-request USDC settlement on Stellar", "Same JSON contract for x402 and MPP variants when enabled"],
+    highlights: [
+      "Per-request settlement on Stellar (USDC default; optional native XLM via SAC)",
+      "Same JSON contract for x402 and MPP variants when enabled",
+    ],
   },
   analyze: {
     name: "Market Analysis",
@@ -76,6 +79,8 @@ export function buildCatalog(req, ctx) {
     llmReady,
     version,
     port,
+    paymentAssets = ["USDC"],
+    xlmUsdRate = 0.35,
   } = ctx;
 
   const envBase =
@@ -111,7 +116,9 @@ export function buildCatalog(req, ctx) {
       payment: "x402",
       price_display: price,
       price_usd: priceUsdFromDisplay(price),
-      settlement_asset: "USDC",
+      payment_assets: paymentAssets,
+      default_settlement_asset: "USDC",
+      xlm_usd_rate: paymentAssets.includes("XLM") ? xlmUsdRate : undefined,
       stellar_network: network,
       body: { [bodyKey]: "string" },
       response_type: "application/json",
@@ -154,7 +161,9 @@ export function buildCatalog(req, ctx) {
       network_label: networkLabel,
       rpc_url: rpcUrl,
       pay_to: payTo,
-      settlement_asset: "USDC",
+      payment_assets: paymentAssets,
+      default_settlement_asset: "USDC",
+      xlm_usd_rate: paymentAssets.includes("XLM") ? xlmUsdRate : undefined,
       x402_enabled: x402Active,
       mpp_charge_enabled: mppChargeActive,
     },

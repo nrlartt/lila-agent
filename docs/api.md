@@ -25,6 +25,10 @@ Metadata for the UI and clients. No secrets.
   "userPaysWithWallet": true,
   "mppCharge": false,
   "mppPremiumBase": null,
+  "paymentAssets": ["USDC", "XLM"],
+  "x402DefaultAsset": "USDC",
+  "xlmPaymentOptionEnabled": true,
+  "xlmUsdRate": 0.35,
   "apiCatalog": { "method": "GET", "path": "/api/catalog", "format": "application/json" },
   "integrationHints": {
     "websiteTerminal": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/chat", "..."] },
@@ -43,6 +47,8 @@ Metadata for the UI and clients. No secrets.
 - `mppCharge`: `true` when [MPP Charge](https://developers.stellar.org/docs/build/agentic-payments/mpp) routes are enabled (`MPP_ENABLED=true` and `MPP_SECRET_KEY` set).
 - `mppPremiumBase`: e.g. `/api/mpp/premium` when MPP is on, else `null`.
 - `apiCatalog`: `{ "method": "GET", "path": "/api/catalog", "format": "application/json" }` — pointer to the machine-readable catalog.
+- `paymentAssets`: e.g. `["USDC"]` or `["USDC","XLM"]` when optional native XLM (Soroban Stellar Asset Contract) is enabled on x402 routes.
+- `xlmUsdRate`: notional USD per 1 XLM used server-side to convert dollar list prices into XLM stroops (not an on-chain oracle); see `LILA_XLM_USD_RATE` in [Environment](environment.md).
 
 ### `GET /api/catalog`
 

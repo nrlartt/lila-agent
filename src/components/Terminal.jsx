@@ -36,6 +36,7 @@ Wallet commands:
   /wallet           Connect Stellar wallet (Freighter)
   /balance          Check wallet balance
   /status           Connection & payment status
+  /asset usdc|xlm   x402 settlement asset (default: USDC; XLM = native SAC, no USDC trustline)
 
 Other commands:
   /services         List available services
@@ -54,6 +55,15 @@ export default function Terminal() {
   const [serverInfo, setServerInfo] = useState(null);
   const [txCount, setTxCount] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
+  const [settlementAsset, setSettlementAsset] = useState(() => {
+    try {
+      const v = localStorage.getItem("lila_x402_settlement");
+      if (v === "XLM" || v === "USDC") return v;
+    } catch {
+      /* ignore */
+    }
+    return "USDC";
+  });
   const terminalRef = useRef(null);
   const inputRef = useRef(null);
   const historyRef = useRef([]);
@@ -79,7 +89,15 @@ export default function Terminal() {
         const data = await res.json();
         setServerInfo(data);
         if (data.x402Server) {
-          addLine("▸ x402: ENABLED. Pay per request from your Freighter wallet (USDC)", "success");
+          addLine("▸ x402: ENABLED. Pay per request from your Freighter wallet", "success");
+          if (data.xlmPaymentOptionEnabled) {
+            addLine(
+              `▸ Settlement assets: USDC (default) or XLM — XLM notionally priced at ${data.xlmUsdRate} USD/XLM (operator setting)`,
+              "dim",
+            );
+          } else {
+            addLine("▸ Settlement: USDC on Stellar (Soroban / SEP-41)", "dim");
+          }
         } else {
           addLine("▸ x402: unavailable in this deployment (demo / offline payments)", "warn");
         }
@@ -165,11 +183,34 @@ export default function Terminal() {
         break;
       }
 
+      case "asset": {
+        const a = arg.trim().toLowerCase();
+        if (a !== "usdc" && a !== "xlm") {
+          addLine("✗ Usage: /asset usdc  or  /asset xlm", "error");
+          addLine("  USDC: default stablecoin (trustline on testnet/mainnet).", "dim");
+          addLine("  XLM: native asset via Soroban SAC when the server enables it (no USDC trustline).", "dim");
+          break;
+        }
+        if (a === "xlm" && serverInfo && !serverInfo.xlmPaymentOptionEnabled) {
+          addLine("✗ XLM settlement is disabled on this server. Staying on USDC.", "error");
+          break;
+        }
+        setSettlementAsset(a === "xlm" ? "XLM" : "USDC");
+        try {
+          localStorage.setItem("lila_x402_settlement", a === "xlm" ? "XLM" : "USDC");
+        } catch {
+          /* ignore */
+        }
+        addLine(`✓ x402 settlement set to ${a.toUpperCase()}`, "success");
+        break;
+      }
+
       case "status": {
         addLine("", "output");
         addLine("━━━ LILA STATUS ━━━━━━━━━━━━━━━━━━━━━━━━━", "accent");
         addLine(`  Stellar:     ${serverInfo?.networkLabel || "Testnet"}`, "info");
         addLine(`  x402:        ${serverInfo?.x402Server ? "ready" : "off"}`, serverInfo?.x402Server ? "success" : "warn");
+        addLine(`  Settlement:  ${settlementAsset}${serverInfo?.xlmPaymentOptionEnabled ? " (XLM available)" : " (USDC only)"}`, "info");
         addLine(`  AI:          ${serverInfo?.llmReady ? "ready" : "demo / static"}`, serverInfo?.llmReady ? "success" : "warn");
         addLine(`  Your wallet: ${wallet ? shortenAddress(wallet) : "not connected"}`, "info");
         if (serverInfo?.payTo) {
@@ -193,7 +234,10 @@ export default function Terminal() {
         addLine("", "output");
         addLine(`  Network:  ${serverInfo?.network || "stellar:testnet"}`, "dim");
         addLine(`  x402:     ${serverInfo?.x402Server ? "ENABLED ✓ (Freighter)" : "DEMO MODE"}`, serverInfo?.x402Server ? "success" : "warn");
-        addLine(`  Protocol: Pay-per-request via Stellar USDC`, "dim");
+        addLine(
+          `  Protocol: Pay-per-request (${serverInfo?.xlmPaymentOptionEnabled ? "USDC or XLM" : "USDC"})`,
+          "dim",
+        );
         break;
       }
 
@@ -248,9 +292,18 @@ export default function Terminal() {
     };
     const bodyKey = bodyKeyMap[service];
 
+    const effectiveSettlement =
+      serverInfo?.x402Server && serverInfo?.xlmPaymentOptionEnabled && settlementAsset === "XLM"
+        ? "XLM"
+        : "USDC";
+
     addLine("", "output");
     addLine(`[x402] ⚡ Requesting service: ${service}`, "payment");
-    addLine(`[x402] Price: $${price} USDC on Stellar testnet`, "payment");
+    const netLabel = serverInfo?.networkLabel || (serverInfo?.network === "stellar:pubnet" ? "Mainnet" : "Testnet");
+    addLine(
+      `[x402] Settlement: ${effectiveSettlement}  │  List price: $${price} USD notional (${netLabel})`,
+      "payment",
+    );
     setProcessing(true);
 
     try {
@@ -263,7 +316,7 @@ export default function Terminal() {
       if (serverInfo?.x402Server) {
         if (!wallet) {
           addLine("✗ Connect your wallet first: /wallet", "error");
-          addLine("  Real x402 charges come from your Freighter wallet (USDC + XLM for fees).", "dim");
+          addLine("  Real x402 charges come from your Freighter wallet (USDC and/or XLM balance + XLM for fees).", "dim");
           setProcessing(false);
           return;
         }
@@ -271,6 +324,7 @@ export default function Terminal() {
           wallet,
           serverInfo.network,
           serverInfo.rpcUrl,
+          effectiveSettlement,
         );
         res = await paidFetch(apiUrl(`/api/premium/${service}`), {
           method: "POST",
@@ -285,11 +339,37 @@ export default function Terminal() {
         });
       }
 
-      const data = await res.json();
+      const rawText = await res.text();
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        data = { _nonJson: rawText?.slice(0, 800) || "" };
+      }
 
       if (!res.ok) {
-        addLine(`✗ Error: ${data.error || data.message || "Request failed"}`, "error");
-        if (data.detail) addLine(`  ${data.detail}`, "dim");
+        const fromBody =
+          data.error ||
+          data.message ||
+          data.detail ||
+          (typeof data.reason === "string" ? data.reason : null) ||
+          (typeof data.description === "string" ? data.description : null);
+        let msg =
+          fromBody ||
+          (res.status === 402
+            ? `Payment not completed (HTTP 402). Approve the ${effectiveSettlement === "XLM" ? "XLM (SAC)" : "USDC"} authorization in Freighter, or confirm balances and network.`
+            : null);
+        if (!msg && data._nonJson) {
+          msg = `HTTP ${res.status}: ${data._nonJson.slice(0, 200)}${data._nonJson.length > 200 ? "…" : ""}`;
+        }
+        if (!msg) {
+          msg = `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ""}`.trim();
+        }
+        addLine(`✗ Error: ${msg}`, "error");
+        if (res.status === 402) {
+          addLine("  If Freighter never prompted, check the site is HTTPS and the wallet is on the same network as LILA.", "dim");
+        }
+        if (data.detail && !String(msg).includes(String(data.detail))) addLine(`  ${data.detail}`, "dim");
         if (data.hint) addLine(`  Hint: ${data.hint}`, "warn");
         setProcessing(false);
         return;
@@ -321,7 +401,10 @@ export default function Terminal() {
         } else {
           addLine(`[x402] ✓ Request completed`, "success");
         }
-        addLine(`[x402] Cost: $${price} USDC`, "payment");
+        addLine(
+          `[x402] Cost: $${price} USD notional — settled in ${effectiveSettlement}`,
+          "payment",
+        );
       } else {
         addLine(`[x402] ○ Demo mode. No on-chain payment`, "warn");
         addLine(`[x402] Simulated cost: $${price} USDC`, "dim");
@@ -375,6 +458,14 @@ export default function Terminal() {
           <span className="separator">│</span>
           <span className="status-network">
             {serverInfo?.networkLabel || "STELLAR"}
+          </span>
+          <span className="separator">│</span>
+          <span className="status-network" title="x402 settlement asset">
+            {serverInfo?.x402Server && serverInfo?.xlmPaymentOptionEnabled
+              ? settlementAsset
+              : serverInfo?.x402Server
+                ? "USDC"
+                : "—"}
           </span>
           <span className="separator">│</span>
           <span className={isLive ? "status-live" : "status-demo"}>
