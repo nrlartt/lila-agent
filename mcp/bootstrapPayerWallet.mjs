@@ -6,18 +6,21 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-
-function truthy(v) {
-  return v === "true" || v === "1";
-}
+import { envBool } from "./envBool.mjs";
 
 export async function bootstrapPayerWallet() {
+  const rawAuto = process.env.LILA_AUTO_CREATE_PAYER_WALLET;
   if (process.env.LILA_PAYER_SECRET?.trim()) {
     process.env.LILA_MCP_PAYER_SOURCE = "env";
     return;
   }
 
-  const autoCreate = truthy(process.env.LILA_AUTO_CREATE_PAYER_WALLET);
+  const autoCreate = envBool(rawAuto);
+  if (rawAuto !== undefined && rawAuto !== "" && !autoCreate) {
+    console.error(
+      `[lila-mcp] bootstrapPayerWallet: LILA_AUTO_CREATE_PAYER_WALLET=${JSON.stringify(rawAuto)} is not a true value — use true/1/yes/on (case-insensitive).`,
+    );
+  }
   const explicitFile = process.env.LILA_PAYER_SECRET_FILE?.trim();
   const openclawHome = process.env.OPENCLAW_HOME?.trim() || path.join(os.homedir(), ".openclaw");
   const defaultPath = path.join(openclawHome, "lila-payer.secret");

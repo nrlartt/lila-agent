@@ -14,17 +14,23 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { getPayerPaidFetch } from "./x402PayerClient.mjs";
 import { bootstrapPayerWallet } from "./bootstrapPayerWallet.mjs";
+import { envBool } from "./envBool.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath =
   process.env.LILA_DOTENV_PATH?.trim() || path.join(__dirname, "..", ".env");
+// Do not override vars already set by OpenClaw / parent (e.g. LILA_AUTO_CREATE_PAYER_WALLET).
 dotenv.config({
   path: envPath,
-  override: true,
+  override: false,
   quiet: true,
 });
 
 await bootstrapPayerWallet();
+
+console.error(
+  `[lila-mcp] Payer after bootstrap: source=${process.env.LILA_MCP_PAYER_SOURCE ?? "none"} LILA_AUTO_CREATE_PAYER_WALLET=${process.env.LILA_AUTO_CREATE_PAYER_WALLET ?? "unset"}`,
+);
 
 const PORT = process.env.PORT || "3001";
 const baseUrl = (process.env.LILA_BASE_URL || `http://127.0.0.1:${PORT}`).replace(/\/$/, "");
@@ -34,9 +40,7 @@ const RPC_URL = process.env.STELLAR_RPC_URL || "https://soroban-testnet.stellar.
 const PAY_TO = process.env.STELLAR_PAY_TO?.trim() || "";
 
 /** Only for local/dev: allow POST /api/agent/query without LILA_PAYER_SECRET. Never use in production OpenClaw. */
-const ALLOW_SERVER_AGENT_QUERY =
-  process.env.LILA_ALLOW_SERVER_AGENT_QUERY === "true" ||
-  process.env.LILA_ALLOW_SERVER_AGENT_QUERY === "1";
+const ALLOW_SERVER_AGENT_QUERY = envBool(process.env.LILA_ALLOW_SERVER_AGENT_QUERY);
 
 const PAYER_SECRET_SET = !!process.env.LILA_PAYER_SECRET?.trim();
 
@@ -275,6 +279,17 @@ server.registerTool(
   {
     description:
       "MCP-only: whether LILA_PAYER_SECRET is set and whether server-agent fallback is allowed. Never exposes the secret.",
+  },
+  async () => {
+    return jsonResult(await getPayerStatus());
+  },
+);
+
+server.registerTool(
+  "lila_mcp_payer_status",
+  {
+    description:
+      "Alias of lila_payer_status (same JSON). Use if your host only lists prefixed tools.",
   },
   async () => {
     return jsonResult(await getPayerStatus());

@@ -68,7 +68,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 |------|------|--------|-------------|
 | `lila_services` | `GET /api/services` + **`mcpClient`** (MCP only) | none | First call: prices, readiness, and **wallet setup** (`mcpClient.walletRequiredBeforeLilaQuery`, `recommendedOrder`). |
 | `lila_health` | `GET /api/health` | none | Liveness only; uptime and `llmReady`. |
-| `lila_payer_status` | *(MCP local; no HTTP)* | none | **`LILA_PAYER_SECRET`** status, payer **G** address, and whether dev fallback is allowed. |
+| `lila_payer_status` | *(MCP local; no HTTP)* | none | **`LILA_PAYER_SECRET`** status, payer **G** address, and whether dev fallback is allowed. Alias: **`lila_mcp_payer_status`**. If your host hides this tool, read **`lila_services`** → **`mcpClient.payerStatus`** (same data). |
 | `lila_query` | **`POST /api/premium/*`** (requires **`LILA_PAYER_SECRET`**) | JSON: `service`, `input` | Fails until **`LILA_PAYER_SECRET`** is set unless **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only). |
 
 Tool names in your runtime may be **prefixed** (e.g. `lila_lila_query`). Use the tools list returned by the host.
