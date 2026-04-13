@@ -29,6 +29,12 @@ Metadata for the UI and clients. No secrets.
   "x402DefaultAsset": "USDC",
   "xlmPaymentOptionEnabled": true,
   "xlmUsdRate": 0.17,
+  "xlmUsdRateMeta": {
+    "mode": "auto",
+    "source": "coingecko",
+    "updatedAt": "2026-04-13T12:00:00.000Z",
+    "lastError": null
+  },
   "apiCatalog": { "method": "GET", "path": "/api/catalog", "format": "application/json" },
   "integrationHints": {
     "websiteTerminal": { "protocol": "x402", "description": "...", "paths": ["POST /api/premium/chat", "..."] },
@@ -48,7 +54,8 @@ Metadata for the UI and clients. No secrets.
 - `mppPremiumBase`: e.g. `/api/mpp/premium` when MPP is on, else `null`.
 - `apiCatalog`: `{ "method": "GET", "path": "/api/catalog", "format": "application/json" }` — pointer to the machine-readable catalog.
 - `paymentAssets`: e.g. `["USDC"]` or `["USDC","XLM"]` when optional native XLM (Soroban Stellar Asset Contract) is enabled on x402 routes.
-- `xlmUsdRate`: notional USD per 1 XLM used server-side to convert dollar list prices into XLM stroops (not an on-chain oracle); see `LILA_XLM_USD_RATE` in [Environment](environment.md).
+- `xlmUsdRate`: USD per 1 XLM used server-side to convert dollar list prices into XLM stroops (not an on-chain oracle). When `LILA_XLM_USD_RATE` is unset, this value is refreshed from public price APIs on a schedule.
+- `xlmUsdRateMeta`: `{ mode: "fixed"|"auto"|"static_default", source?, updatedAt?, lastError? }` — how `xlmUsdRate` is sourced (env vs auto-fetch vs offline default).
 
 ### `GET /api/catalog`
 

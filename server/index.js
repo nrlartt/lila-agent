@@ -18,6 +18,9 @@ import { ALLOWED_SERVICES, BODY_KEY_MAP, PRICE_MAP } from "./serviceRegistry.js"
 import {
   buildPremiumAccepts,
   getXlmUsdRateForApi,
+  getXlmUsdRateMeta,
+  initXlmUsdRateFeed,
+  subscribeXlmUsdRateUpdates,
   isXlmPaymentOptionEnabled,
 } from "./x402PremiumAccepts.js";
 
@@ -148,8 +151,9 @@ async function setupX402Server() {
     x402Active = true;
     console.log("[SERVER] x402 middleware active; premium endpoints protected");
     if (isXlmPaymentOptionEnabled()) {
+      const meta = getXlmUsdRateMeta();
       console.log(
-        `[SERVER] x402: optional XLM settlement enabled (notional ${getXlmUsdRateForApi()} USD per 1 XLM for amount derivation; disable with LILA_X402_ENABLE_XLM=false)`,
+        `[SERVER] x402: optional XLM settlement enabled (notional ${getXlmUsdRateForApi()} USD per 1 XLM, mode=${meta.mode}${meta.source ? `, source=${meta.source}` : ""}; set LILA_XLM_USD_RATE to fix manually; LILA_X402_ENABLE_XLM=false to disable XLM in accepts)`,
       );
     }
   } catch (err) {
@@ -183,6 +187,7 @@ app.get("/api/services", (_req, res) => {
     x402DefaultAsset: "USDC",
     xlmPaymentOptionEnabled: isXlmPaymentOptionEnabled(),
     xlmUsdRate: getXlmUsdRateForApi(),
+    xlmUsdRateMeta: getXlmUsdRateMeta(),
     /** Helps autonomous agents pick the right HTTP integration (see public/skill.md). */
     integrationHints: {
       websiteTerminal: {
@@ -574,7 +579,16 @@ if (process.env.NODE_ENV === "production") {
 //  STARTUP
 // ──────────────────────────────────────────────
 
+await initXlmUsdRateFeed();
 await setupX402Server();
+subscribeXlmUsdRateUpdates(async () => {
+  console.log(
+    "[SERVER] XLM/USD rate updated; rebuilding x402 middleware (new rate:",
+    getXlmUsdRateForApi(),
+    ")",
+  );
+  await setupX402Server();
+});
 await setupAgentClient(AGENT_SECRET, NETWORK, RPC_URL);
 setupLLM({
   openclawUrl: process.env.OPENCLAW_GATEWAY_URL || null,

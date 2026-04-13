@@ -3,12 +3,21 @@
  * - USDC (default client choice: first in `accepts`) via dollar-denominated `price`.
  * - Native XLM via Soroban Stellar Asset Contract (SEP-41), same as on xlm402-style catalogs.
  *
- * USD→XLM conversion uses LILA_XLM_USD_RATE (operator-maintained notional rate, not an on-chain oracle).
+ * USD→XLM conversion uses `getXlmUsdRateForApi()` (see xlmUsdRateFeed.js: env, or auto-fetched spot).
  */
 import { Asset, Networks } from "@stellar/stellar-sdk";
+import {
+  getXlmUsdRateForApi,
+  DEFAULT_LILA_XLM_USD_RATE,
+} from "./xlmUsdRateFeed.js";
 
-/** Default USD per 1 XLM when env is unset — approximate spot band; override with `LILA_XLM_USD_RATE`. */
-export const DEFAULT_LILA_XLM_USD_RATE = 0.17;
+export {
+  getXlmUsdRateForApi,
+  getXlmUsdRateMeta,
+  initXlmUsdRateFeed,
+  subscribeXlmUsdRateUpdates,
+  DEFAULT_LILA_XLM_USD_RATE,
+} from "./xlmUsdRateFeed.js";
 
 const PASSPHRASE = {
   "stellar:testnet": Networks.TESTNET,
@@ -61,8 +70,7 @@ export function buildPremiumAccepts(network, payTo, usdPriceString, opts = {}) {
     opts.enableXlm !== undefined
       ? opts.enableXlm
       : !["0", "false", "no"].includes(String(process.env.LILA_X402_ENABLE_XLM || "true").toLowerCase());
-  const rateRaw =
-    opts.xlmUsdRate ?? parseFloat(process.env.LILA_XLM_USD_RATE || String(DEFAULT_LILA_XLM_USD_RATE));
+  const rateRaw = opts.xlmUsdRate ?? getXlmUsdRateForApi();
   const xlmUsdRate =
     Number.isFinite(rateRaw) && rateRaw > 0 ? rateRaw : DEFAULT_LILA_XLM_USD_RATE;
 
@@ -93,11 +101,6 @@ export function buildPremiumAccepts(network, payTo, usdPriceString, opts = {}) {
   };
 
   return { accepts: [usdc, xlm] };
-}
-
-export function getXlmUsdRateForApi() {
-  const r = parseFloat(process.env.LILA_XLM_USD_RATE || String(DEFAULT_LILA_XLM_USD_RATE));
-  return Number.isFinite(r) && r > 0 ? r : DEFAULT_LILA_XLM_USD_RATE;
 }
 
 export function isXlmPaymentOptionEnabled() {

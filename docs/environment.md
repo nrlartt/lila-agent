@@ -8,7 +8,9 @@ Load order: `.env` at the repository root (see `server/index.js` and Vite for cl
 |----------|----------|-------------|
 | `STELLAR_PAY_TO` | For x402 middleware | Public key receiving USDC / XLM |
 | `LILA_X402_ENABLE_XLM` | Optional | If not `false`, x402 `accepts` includes native XLM (SAC) after USDC |
-| `LILA_XLM_USD_RATE` | Optional | Notional USD per 1 XLM to derive XLM amounts from dollar prices (default `0.17`, approximate spot; not an oracle) |
+| `LILA_XLM_USD_RATE` | Optional | If **set**: fixed USD per 1 XLM (no HTTP). If **unset**: server polls **CoinGecko** (fallback **Binance**) on a timer and uses the latest value; see also `LILA_XLM_USD_RATE_REFRESH_MS`. |
+| `LILA_XLM_USD_RATE_REFRESH_MS` | Optional | Auto-fetch interval in ms (default `300000` = 5 min; minimum 60 s). Ignored when `LILA_XLM_USD_RATE` is set. |
+| `LILA_XLM_USD_RATE_FETCH` | Optional | If `false` / `off` / `disabled` and `LILA_XLM_USD_RATE` is unset: use static default (~`0.17`) with no outbound HTTP (offline / tests). |
 | `STELLAR_AGENT_SECRET` | Optional | Server agent secret for `/api/agent/query` |
 | `STELLAR_NETWORK` | Recommended | e.g. `stellar:testnet` or `stellar:pubnet` |
 | `FACILITATOR_URL` | Defaulted | x402 facilitator HTTP endpoint |
