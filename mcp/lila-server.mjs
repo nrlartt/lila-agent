@@ -1,7 +1,7 @@
 /**
  * MCP server (stdio). Exposes LILA to OpenClaw, Cursor, Claude Code, and other MCP clients.
  *
- * External agents must set LILA_PAYER_SECRET before lila_query (x402 on POST /api/premium/*).
+ * Payer wallet: LILA_PAYER_SECRET, or LILA_PAYER_SECRET_FILE, or LILA_AUTO_CREATE_PAYER_WALLET (see bootstrapPayerWallet.mjs).
  * Optional dev-only: LILA_ALLOW_SERVER_AGENT_QUERY=true enables POST /api/agent/query fallback.
  *
  * Do not write to stdout except MCP JSON-RPC (use console.error for warnings).
@@ -13,6 +13,7 @@ import * as z from "zod/v4";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { getPayerPaidFetch } from "./x402PayerClient.mjs";
+import { bootstrapPayerWallet } from "./bootstrapPayerWallet.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envPath =
@@ -22,6 +23,8 @@ dotenv.config({
   override: true,
   quiet: true,
 });
+
+await bootstrapPayerWallet();
 
 const PORT = process.env.PORT || "3001";
 const baseUrl = (process.env.LILA_BASE_URL || `http://127.0.0.1:${PORT}`).replace(/\/$/, "");
@@ -91,6 +94,7 @@ async function getPayerStatus() {
       lilaPayerSecretRequired: true,
       serverAgentFallbackAllowed: false,
       payerPublicKey: kp.publicKey(),
+      payerSecretSource: process.env.LILA_MCP_PAYER_SOURCE || "env",
       lilaQueryPayment: "external_wallet",
       lilaQueryHttp: "POST /api/premium/* (x402 signed by LILA_PAYER_SECRET)",
       network: NETWORK,
@@ -213,7 +217,7 @@ const server = new McpServer(
       "Production API: LILA_BASE_URL=https://lilagent.xyz (or http://127.0.0.1:" + PORT + " locally).",
       "Match STELLAR_NETWORK and STELLAR_RPC_URL to the deployment (testnet vs mainnet).",
       "Tool lila_payer_status: shows whether LILA_PAYER_SECRET is active and the payer G address (no secrets).",
-      "lila_services includes mcpClient.walletRequiredBeforeLilaQuery and recommendedOrder — configure wallet before lila_query.",
+      "lila_services includes mcpClient — optional LILA_AUTO_CREATE_PAYER_WALLET auto-provisions a key file (see docs).",
     ].join(" "),
   },
 );
@@ -245,6 +249,7 @@ server.registerTool(
           "2. Call lila_payer_status to confirm payer G address.",
           "3. Call lila_query for paid AI.",
         ],
+        payerSecretSource: process.env.LILA_MCP_PAYER_SOURCE || null,
         payerStatus: payer,
       },
     });

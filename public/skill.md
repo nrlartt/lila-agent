@@ -44,7 +44,7 @@ Do **not** use LILA tools for unrelated tasks (e.g. generic web search) unless t
 
 1. **MCP server** for LILA is registered and running (see repo `config/openclaw-lila.mcp.example.json` and [`docs/openclaw-mcp.md`](https://github.com/nrlartt/lila-agent/blob/main/docs/openclaw-mcp.md)).
 2. Environment **`LILA_BASE_URL`** must point to the live API (production: **`https://lilagent.xyz`**, no trailing slash). Local dev may use `http://127.0.0.1:3001`.
-3. **`LILA_PAYER_SECRET`** is **required** in the MCP process for **`lila_query`**; match **`STELLAR_NETWORK`** / **`STELLAR_RPC_URL`** to the API. **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only) enables **`/api/agent/query`** without **`LILA_PAYER_SECRET`**. **`lila_services`** shows API readiness.
+3. **`lila_query`** needs a payer key: **`LILA_PAYER_SECRET`**, **`LILA_PAYER_SECRET_FILE`**, or opt-in **`LILA_AUTO_CREATE_PAYER_WALLET`** (auto-saves under **`~/.openclaw/lila-payer.secret`** — fund USDC). Match **`STELLAR_NETWORK`** / **`STELLAR_RPC_URL`**. **`LILA_ALLOW_SERVER_AGENT_QUERY=true`** (dev only) enables **`/api/agent/query`** without a payer key. Browser demos (e.g. [mpp.stellar.buzz](https://mpp.stellar.buzz/)) use in-page wallet; MCP uses env/file instead.
 
 ---
 

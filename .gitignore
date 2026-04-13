@@ -12,3 +12,5 @@ dist/
 !.vscode/extensions.json
 coverage/
 *.local
+lila-payer.secret
+*.payer.secret
