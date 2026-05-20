@@ -243,7 +243,7 @@ export function PortfolioPage() {
                 ◎
               </span>
               <h2>No positions yet</h2>
-              <p className="muted">Buy tokens in {BOT_NAME} or Agent — cost basis tracks automatically.</p>
+              <p className="muted">Buy tokens in {BOT_NAME} or Market — cost basis tracks automatically.</p>
               <div className="portfolio-empty__actions">
                 <Link to="/bot" className="btn btn--primary">
                   Open Bot

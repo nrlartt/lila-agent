@@ -455,18 +455,6 @@ export function TokenFeed() {
 
 
 
-        {indexing && (
-
-          <div className="terminal-banner">
-
-            <span className="terminal-banner__icon">◌</span>
-
-            Indexer syncing historical data — counts update in the background.
-
-          </div>
-
-        )}
-
       </section>
 
 

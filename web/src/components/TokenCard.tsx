@@ -155,7 +155,7 @@ export function TokenCard({ token: t, rank }: Props) {
         <div className="token-card__footer">
           {t.canGraduate && <span className="token-card__pill">Grad ready</span>}
           <div className="token-card__actions">
-            <span className="token-card__cta">Agent →</span>
+            <span className="token-card__cta">Market →</span>
             <Link
               to={`/bot?token=${t.address}`}
               className="token-card__cta token-card__cta--bot"

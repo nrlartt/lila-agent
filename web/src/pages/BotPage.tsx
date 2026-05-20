@@ -30,8 +30,11 @@ import { useBotRiskConsent } from "../hooks/useBotRiskConsent";
 import { useTradingWallet } from "../hooks/useTradingWallet";
 import { AGENT_NAME, BOT_NAME, BOT_TAGLINE } from "../lib/brand";
 import { LilaAvatar } from "../components/LilaAvatar";
+import { LaunchSniperPanel } from "../components/launch/LaunchSniperPanel";
+import { useLaunchSniper } from "../hooks/useLaunchSniper";
 
 type BotTab = "manual" | "auto";
+type BotPageMode = "trade" | "launch";
 
 function refsToTokens(refs: StoredTokenRef[]): Token[] {
   return refs.map((r) => ({
@@ -72,6 +75,7 @@ export function BotPage() {
   const { balance: usdcBalance } = useUsdcBalance();
 
   const [tab, setTab] = useState<BotTab>("manual");
+  const [pageMode, setPageMode] = useState<BotPageMode>("trade");
   const [tokenInput, setTokenInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
@@ -88,6 +92,7 @@ export function BotPage() {
 
   const tradingWallet = useTradingWallet();
   const autoTrader = useAutoTrader(token, honeypot, tradingWallet.session);
+  const launchSniper = useLaunchSniper(tradingWallet.session, address);
   const { stop: stopAutoBot, running: autoBotRunning } = autoTrader;
   const autoBotRunningRef = useRef(autoBotRunning);
   autoBotRunningRef.current = autoBotRunning;
@@ -173,7 +178,7 @@ export function BotPage() {
     <div className="bot-page bot-page--pro">
       <header className="bot-hero">
         <div className="bot-hero__lead">
-          <LilaAvatar size="lg" pulse={autoTrader.running} />
+          <LilaAvatar size="lg" pulse={autoTrader.running || launchSniper.running} />
           <div className="bot-hero__copy">
             <p className="bot-hero__eyebrow">Lila Agent · alt.fun · HyperEVM</p>
             <h1>{BOT_NAME}</h1>
@@ -197,6 +202,12 @@ export function BotPage() {
             <div className="bot-pill bot-pill--accent">
               <span className="bot-pill__label">Trading wallet</span>
               <span className="bot-pill__value mono">{tradingWallet.usdcLabel} USDC</span>
+            </div>
+          )}
+          {launchSniper.running && (
+            <div className="bot-pill bot-pill--live">
+              <span className="bot-pill__dot" />
+              <span className="bot-pill__value">Launch sniper</span>
             </div>
           )}
           {autoTrader.running && (
@@ -227,6 +238,28 @@ export function BotPage() {
       )}
 
       {riskConsent.accepted && (
+      <>
+      <nav className="bot-page-tabs" aria-label="Bot mode">
+        <button
+          type="button"
+          className={pageMode === "trade" ? "active" : ""}
+          onClick={() => setPageMode("trade")}
+        >
+          Token trading
+        </button>
+        <button
+          type="button"
+          className={pageMode === "launch" ? "active" : ""}
+          onClick={() => setPageMode("launch")}
+        >
+          New launches
+          {launchSniper.running && <span className="bot-tabs__dot" />}
+        </button>
+      </nav>
+
+      {pageMode === "launch" ? (
+        <LaunchSniperPanel sniper={launchSniper} tradingWallet={tradingWallet} />
+      ) : (
       <div className="bot-grid">
         <aside className="bot-panel bot-panel--picker">
           <div className="bot-panel__head">
@@ -400,6 +433,8 @@ export function BotPage() {
           )}
         </section>
       </div>
+      )}
+      </>
       )}
     </div>
   );

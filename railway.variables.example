@@ -1,0 +1,44 @@
+# Railway Variables — copy each row to Railway dashboard (Service → Variables)
+# Do NOT commit filled secrets. Non-secret defaults are pre-filled below.
+#
+# Build-time (trigger redeploy after change):
+#   VITE_SITE_URL, VITE_API_URL, VITE_RPC_URL, VITE_REFERRER_ADDRESS,
+#   VITE_MEDIA_BASE_URL, VITE_TELEGRAM_BOT_USERNAME
+#
+# Runtime:
+#   RPC_URL, REFERRER_ADDRESS, PORT, DATA_DIR, BOT_PUBLIC_URL, CONSENT_IP_SALT,
+#   SLIPPAGE_PERCENT, TELEGRAM_BOT_TOKEN, VAPID_*, ALTFUN_API_URL, INDEXER_*, ACTIVITY_*
+
+# --- Build (Vite) ---
+VITE_SITE_URL=https://lilagent.xyz
+VITE_API_URL=
+VITE_RPC_URL=https://rpc.hyperliquid.xyz/evm
+VITE_REFERRER_ADDRESS=
+VITE_MEDIA_BASE_URL=https://api.alt.fun
+VITE_TELEGRAM_BOT_USERNAME=
+
+# --- Runtime (Node server) ---
+NODE_ENV=production
+PORT=3000
+RPC_URL=https://rpc.hyperliquid.xyz/evm
+REFERRER_ADDRESS=
+SLIPPAGE_PERCENT=10
+DATA_DIR=/data
+BOT_PUBLIC_URL=https://lilagent.xyz
+CONSENT_IP_SALT=
+ALTFUN_API_URL=https://api.alt.fun
+INDEXER_BLOCK_CHUNK=10
+INDEXER_RPC_PAUSE_MS=2500
+INDEXER_ENRICH_BATCH=15
+CATALOG_REFRESH_SEC=600
+CATALOG_PAGE_DELAY_MS=150
+ACTIVITY_POLL_MS=4000
+ACTIVITY_TRADE_LIMIT=50
+ACTIVITY_REFRESH_MS=2000
+
+# --- Secrets (fill yourself) ---
+TELEGRAM_BOT_TOKEN=
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:support@lilagent.xyz
+PRIVATE_KEY=
