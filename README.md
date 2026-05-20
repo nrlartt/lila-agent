@@ -95,12 +95,13 @@ Required for web trading: `REFERRER_ADDRESS` (server) and matching `VITE_REFERRE
 
 ## Deploy (Railway — lilagent.xyz)
 
-1. Connect this repo to Railway.
-2. `railway.toml` is included: `npm ci && npm run build` → `node dist/index.js server`.
-3. Mount a **volume** at `DATA_DIR` (e.g. `/data`) for SQLite persistence.
-4. Set all `.env` and `VITE_*` variables in Railway **before** deploy (Vite vars at build time).
-5. Point custom domain **lilagent.xyz** to the service.
-6. Health check: `GET /api/health`
+1. Connect this repo to Railway (uses root `Dockerfile`).
+2. Mount a **volume** at `DATA_DIR` (e.g. `/data`) for SQLite persistence.
+3. Set all `.env` and `VITE_*` variables in Railway **before** deploy (Vite embeds `VITE_*` at build time).
+4. Point custom domain **lilagent.xyz** to the service.
+5. Health check: `GET /api/health`
+
+If you see npm `EBUSY` on `node_modules/.cache`, ensure `railway.toml` has `builder = "DOCKERFILE"`.
 
 Optional second Railway service for Telegram: start command `node dist/index.js bot`, env `TELEGRAM_BOT_TOKEN`.
 

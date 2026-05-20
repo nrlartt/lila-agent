@@ -1,0 +1,14 @@
+node_modules
+web/node_modules
+dist
+web/dist
+data
+.env
+web/.env
+.git
+.gitignore
+*.log
+.DS_Store
+web/tsconfig.tsbuildinfo
+.cursor
+terminals

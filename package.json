@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && npm run build --prefix web",
+    "install:all": "npm ci && npm ci --prefix web",
     "start:bot": "tsx src/index.ts bot",
     "start:bot:prod": "node dist/index.js bot",
     "start:server": "tsx src/index.ts server",
