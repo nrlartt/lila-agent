@@ -6,6 +6,8 @@ import {
 
   fetchToken,
 
+  fetchTokenHoneypot,
+
   fetchTokenHolders,
 
   subscribeEvents,
@@ -52,6 +54,7 @@ import { TokenAvatar } from "../components/ui/TokenAvatar";
 
 import { CopyButton } from "../components/ui/CopyButton";
 import { HoneypotBadge } from "../components/HoneypotBadge";
+import { TokenSafetyPanel } from "../components/TokenSafetyPanel";
 
 
 
@@ -63,6 +66,8 @@ export function TokenPage() {
 
   const [trades, setTrades] = useState<Trade[]>([]);
   const [honeypot, setHoneypot] = useState<HoneypotCheck | null>(null);
+  const [honeypotLoading, setHoneypotLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const [holders, setHolders] = useState<Holder[]>([]);
 
@@ -93,13 +98,37 @@ export function TokenPage() {
 
     if (!address) return;
 
-    fetchToken(address).then((data) => {
-      setToken(data.token);
-      setTrades(data.trades);
-      setHoneypot(data.honeypot);
-    });
+    setLoadError(false);
+
+    fetchToken(address)
+      .then((data) => {
+        setToken(data.token);
+        setTrades(data.trades);
+        if (data.honeypot) setHoneypot(data.honeypot);
+      })
+      .catch(() => {
+        setToken(null);
+        setLoadError(true);
+      });
 
   };
+
+
+
+  const loadHoneypot = useCallback(() => {
+
+    if (!address) return;
+
+    setHoneypotLoading(true);
+
+    fetchTokenHoneypot(address)
+      .then((data) => {
+        if (data) setHoneypot(data);
+      })
+      .catch(() => {})
+      .finally(() => setHoneypotLoading(false));
+
+  }, [address]);
 
 
 
@@ -152,6 +181,7 @@ export function TokenPage() {
 
   useEffect(() => {
     load();
+    loadHoneypot();
     return subscribeEvents((type, data) => {
       const d = data as { token?: string; address?: string };
       const addr = (d.token ?? d.address)?.toLowerCase();
@@ -160,16 +190,18 @@ export function TokenPage() {
 
       if (type === "trade") {
         load();
+        loadHoneypot();
         scheduleHoldersRefresh();
         return;
       }
 
       if (type === "token_updated") {
         load();
+        loadHoneypot();
         scheduleHoldersRefresh();
       }
     });
-  }, [address, scheduleHoldersRefresh]);
+  }, [address, scheduleHoldersRefresh, loadHoneypot]);
 
 
 
@@ -196,6 +228,26 @@ export function TokenPage() {
     prevTopTrade.current = key;
 
   }, [trades]);
+
+
+
+  if (loadError) {
+
+    return (
+
+      <div className="token-detail token-detail--error">
+
+        <Link to="/" className="back-link">← Back to feed</Link>
+
+        <p className="bot-trade-msg bot-trade-msg--danger">Token could not be loaded.</p>
+
+        <button type="button" className="btn btn--ghost" onClick={load}>Retry</button>
+
+      </div>
+
+    );
+
+  }
 
 
 
@@ -403,7 +455,7 @@ export function TokenPage() {
 
             <TokenPriceChart address={address} ticker={token.ticker} />
 
-
+            <TokenSafetyPanel honeypot={honeypot} loading={honeypotLoading && !honeypot} />
 
             {showsBondingCurve(token.lifecycle) && (
 

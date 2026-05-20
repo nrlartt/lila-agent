@@ -27,7 +27,7 @@ export function FeedHoneypotProvider({
         if (cancelled) return;
         try {
           const h = await fetchTokenHoneypot(addr);
-          if (!cancelled) {
+          if (!cancelled && h) {
             setStatuses((prev) => ({ ...prev, [addr.toLowerCase()]: h.status }));
           }
         } catch {

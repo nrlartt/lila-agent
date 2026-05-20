@@ -310,7 +310,10 @@ app.get("/api/tokens/:address", async (c) => {
 
   let honeypot = null;
   try {
-    honeypot = await checkTokenHoneypot(token.address);
+    honeypot = await Promise.race([
+      checkTokenHoneypot(token.address),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 8_000)),
+    ]);
   } catch {
     // optional safety check
   }

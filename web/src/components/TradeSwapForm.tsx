@@ -32,7 +32,6 @@ import {
   unrealizedPnlPct,
   unrealizedPnlUsd,
 } from "../lib/portfolio";
-import { HoneypotBadge } from "./HoneypotBadge";
 import { formatTradeSimError } from "../lib/tradeSimError";
 import { useUsdcBalance } from "../hooks/useUsdcBalance";
 
@@ -300,9 +299,6 @@ export function TradeSwapForm({
 
   return (
     <div className={rootClass}>
-      {variant === "panel" && honeypot && (
-        <HoneypotBadge honeypot={honeypot} showDetail={honeypot.status !== "clear"} />
-      )}
       {honeypotBlocked && (
         <p className="bot-trade-msg bot-trade-msg--danger">Honeypot risk — trading off</p>
       )}

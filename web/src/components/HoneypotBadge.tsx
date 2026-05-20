@@ -40,17 +40,18 @@ export function HoneypotBadge({
           {honeypot.status === "clear" ? "✓" : honeypot.status === "risk" ? "!" : "?"}
         </span>
         {LABELS[honeypot.status]}
+        <span className="honeypot-badge__score">{honeypot.score}</span>
       </span>
       {showDetail && (
         <div className="honeypot-detail">
           <p className="honeypot-detail__summary">{honeypot.summary}</p>
-          {honeypot.flags.length > 0 && (
+          {honeypot.flags?.length ? (
             <ul className="honeypot-detail__flags">
               {honeypot.flags.map((f) => (
                 <li key={f}>{f}</li>
               ))}
             </ul>
-          )}
+          ) : null}
           <p className="honeypot-detail__disclaimer muted">
             Heuristic check for HyperEVM / alt.fun — not financial advice. DYOR.
           </p>

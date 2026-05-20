@@ -165,19 +165,25 @@ export async function fetchRecentGlobalTrades(limit = 40): Promise<ApiTrade[]> {
 export async function fetchApiTradesForToken(
   tokenAddress: string,
   limit = 40,
+  opts?: { maxPages?: number },
 ): Promise<ApiTrade[]> {
   const want = tokenAddress.toLowerCase();
   const out: ApiTrade[] = [];
   let offset = 0;
   const pageSize = 100;
-  const maxPages = 8;
+  const maxPages = opts?.maxPages ?? 8;
 
   for (let page = 0; page < maxPages && out.length < limit; page++) {
     const url = `${ALTFUN_API_BASE}/api/v1/trades?tokenAddress=${tokenAddress}&limit=${pageSize}&offset=${offset}`;
-    const res = await fetch(url, {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(30_000),
-    });
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(12_000),
+      });
+    } catch {
+      break;
+    }
     if (!res.ok) break;
 
     const json = (await res.json()) as { status: string; data: ApiTrade[] };

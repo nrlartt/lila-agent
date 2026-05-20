@@ -581,6 +581,13 @@ export function getToken(address: string): TokenRow | undefined {
     .get(address) as TokenRow | undefined;
 }
 
+export function countTokensByCreator(creator: string): number {
+  const row = getDb()
+    .prepare("SELECT COUNT(*) AS c FROM tokens WHERE LOWER(creator) = LOWER(?)")
+    .get(creator) as { c: number };
+  return row.c;
+}
+
 export function patchTokenLifecycle(
   address: string,
   lifecycle: Lifecycle,

@@ -1,3 +1,5 @@
+import { normalizeHoneypot } from "./lib/honeypot";
+
 export type Token = {
   address: string;
   name: string;
@@ -57,8 +59,30 @@ export type HoldersResponse = {
 
 export type HoneypotStatus = "clear" | "caution" | "risk" | "unknown";
 
+export type AnalysisSignalStatus = "pass" | "warn" | "fail" | "unknown";
+
+export type AnalysisSignal = {
+  id: string;
+  label: string;
+  status: AnalysisSignalStatus;
+  detail: string;
+};
+
+export type AnalysisLayer = {
+  score: number;
+  signals: AnalysisSignal[];
+  summary: string;
+};
+
+export type SocialLinks = {
+  twitter: string | null;
+  telegram: string | null;
+  website: string | null;
+};
+
 export type HoneypotCheck = {
   status: HoneypotStatus;
+  score: number;
   isHoneypot: boolean;
   canSell: boolean | null;
   buyFeeBps: number;
@@ -70,6 +94,11 @@ export type HoneypotCheck = {
   flags: string[];
   summary: string;
   checkedAt: number;
+  creator: string | null;
+  social: SocialLinks;
+  tokenAnalysis: AnalysisLayer;
+  creatorAnalysis: AnalysisLayer;
+  socialAnalysis: AnalysisLayer;
 };
 
 export type GlobalTrade = {
@@ -174,14 +203,19 @@ export async function fetchToken(address: string): Promise<{
 }> {
   const res = await fetch(`${API}/api/tokens/${address}`);
   if (!res.ok) throw new Error("Token not found");
-  return res.json();
+  const json = await res.json();
+  return {
+    token: json.token,
+    trades: json.trades ?? [],
+    honeypot: normalizeHoneypot(json.honeypot),
+  };
 }
 
-export async function fetchTokenHoneypot(address: string): Promise<HoneypotCheck> {
+export async function fetchTokenHoneypot(address: string): Promise<HoneypotCheck | null> {
   const res = await fetch(`${API}/api/tokens/${address}/honeypot`);
-  if (!res.ok) throw new Error("Honeypot check failed");
-  const json = (await res.json()) as { honeypot: HoneypotCheck };
-  return json.honeypot;
+  if (!res.ok) return null;
+  const json = (await res.json()) as { honeypot?: unknown };
+  return normalizeHoneypot(json.honeypot);
 }
 
 export async function fetchTokenHolders(
