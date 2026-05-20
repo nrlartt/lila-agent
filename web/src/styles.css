@@ -29,6 +29,7 @@
   --mono: "IBM Plex Mono", ui-monospace, monospace;
   --ease-spring: cubic-bezier(0.34, 1.35, 0.64, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --page-gutter: clamp(1rem, 2vw, 2rem);
 }
 
 *,
@@ -107,9 +108,11 @@ a:hover {
 .main {
   position: relative;
   z-index: 1;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 1.25rem 3rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 var(--page-gutter) 3rem;
+  min-width: 0;
 }
 
 /* ——— Page & motion ——— */
@@ -188,20 +191,22 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 100;
-  margin: 0 -1.25rem 1.5rem;
-  padding: 0.85rem 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 0.85rem var(--page-gutter);
   background: rgba(5, 7, 12, 0.75);
   backdrop-filter: blur(16px) saturate(1.4);
   border-bottom: 1px solid var(--border);
 }
 
 .site-header__inner {
-  max-width: 1320px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .brand {
@@ -555,6 +560,8 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .terminal-hero {
@@ -605,7 +612,7 @@ a:hover {
 
 .terminal-hero__stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   gap: 0.75rem;
   margin-top: 1.75rem;
 }
@@ -613,6 +620,26 @@ a:hover {
 @media (max-width: 900px) {
   .terminal-hero__stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .site-header__inner {
+    justify-content: center;
+  }
+
+  .brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .nav-pills {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .header-actions {
+    flex-shrink: 0;
   }
 }
 
@@ -680,7 +707,7 @@ a:hover {
 }
 
 .terminal-workspace {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .terminal-workspace__toolbar {
@@ -813,6 +840,8 @@ a:hover {
 
 .terminal-workspace__body {
   padding: 1.35rem;
+  min-width: 0;
+  overflow: visible;
 }
 
 .terminal-load-more {
@@ -901,19 +930,18 @@ a:hover {
 /* ——— Token cards ——— */
 .token-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-@media (min-width: 1200px) {
-  .token-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: clamp(0.75rem, 1.25vw, 1.15rem);
+  width: 100%;
+  min-width: 0;
+  align-items: start;
 }
 
 .token-card {
   position: relative;
   display: block;
+  width: 100%;
+  min-width: 0;
   color: inherit;
   transition:
     transform 0.4s var(--ease-out-expo),
@@ -1820,7 +1848,8 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 1280px;
+  width: 100%;
+  max-width: none;
 }
 
 .token-detail-hero .panel-body,
@@ -3592,9 +3621,9 @@ a:hover {
 
 /* ——— Bot page pro ——— */
 .bot-page.bot-page--pro {
-  max-width: 1280px;
   width: 100%;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   padding: 0 0 2.5rem;
   display: flex;
   flex-direction: column;
@@ -5090,8 +5119,9 @@ a:hover {
 
 /* ——— Portfolio ——— */
 .portfolio-page {
-  max-width: 880px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .portfolio-page__head-row {
