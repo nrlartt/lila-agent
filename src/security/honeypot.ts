@@ -115,8 +115,8 @@ async function runCheck(token: Address): Promise<HoneypotCheck> {
     canSell = true;
   } else {
     canSell = await simulateSellFromHolder(token, holders?.holders ?? []);
-    if (canSell === true) flags.push("Zap sell path simulates OK");
-    else if (canSell === false) flags.push("Zap sell simulation failed");
+    if (canSell === true) flags.push("Sell path simulates OK");
+    else if (canSell === false) flags.push("Sell simulation failed");
     else flags.push("Sell path not verified (no recent sells)");
   }
 

@@ -180,7 +180,7 @@ export function BotPage() {
         <div className="bot-hero__lead">
           <LilaAvatar size="lg" pulse={autoTrader.running || launchSniper.running} />
           <div className="bot-hero__copy">
-            <p className="bot-hero__eyebrow">Lila Agent · alt.fun · HyperEVM</p>
+            <p className="bot-hero__eyebrow">alt.fun · HyperEVM</p>
             <h1>{BOT_NAME}</h1>
             <p className="bot-hero__sub muted">{BOT_TAGLINE}</p>
             {autoTrader.running && (

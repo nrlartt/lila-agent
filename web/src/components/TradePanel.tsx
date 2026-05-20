@@ -8,7 +8,7 @@ export function TradePanel({ token, honeypot }: Props) {
   return (
     <aside className="glass-panel trade-panel">
       <div className="panel-head panel-head--split">
-        <h2>Execute via Zap</h2>
+        <h2>Trade</h2>
         <div className="panel-head__actions">
           <Link to={`/bot?token=${token.address}`} className="panel-head__bot-link">
             Open in Bot

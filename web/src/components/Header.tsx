@@ -96,20 +96,6 @@ export function Header() {
 
           </a>
 
-          <a
-
-            href="https://docs.alt.fun/integrations"
-
-            target="_blank"
-
-            rel="noreferrer"
-
-          >
-
-            Docs
-
-          </a>
-
         </nav>
 
 

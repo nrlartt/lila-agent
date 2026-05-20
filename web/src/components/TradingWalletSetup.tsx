@@ -220,7 +220,7 @@ export function TradingWalletSetup({ wallet, disabled, compact }: Props) {
           </div>
 
           <div className={`trading-wallet__step ${zapApproved ? "done" : ""}`}>
-            <span className="trading-wallet__step-label">2. Approve Zap</span>
+            <span className="trading-wallet__step-label">2. Approve USDC</span>
             <button
               type="button"
               className="btn btn--ghost btn--xs"

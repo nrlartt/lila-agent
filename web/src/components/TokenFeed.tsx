@@ -406,35 +406,19 @@ export function TokenFeed() {
         <div className="terminal-hero__top">
 
           <p className="terminal-hero__eyebrow">
-
-            <span className="terminal-hero__prompt">›</span>
-
-            Lila Agent · alt.fun · HyperEVM
-
+            alt.fun · HyperEVM
             <span className="live-pill live-pill--inline">
-
               <span className="live-pill__dot" />
-
               live
-
             </span>
-
           </p>
 
           <h1 className="terminal-hero__title">
-
-            Trade & monitor
-
-            <span> every launch</span>
-
+            Trade & monitor <span>every launch</span>
           </h1>
 
           <p className="terminal-hero__desc">
-
-            Full token catalog with volume-ranked feeds, lifecycle filters, and
-
-            non-custodial swaps through the official Zap contract.
-
+            Live catalog, smart filters, non-custodial swaps.
           </p>
 
         </div>

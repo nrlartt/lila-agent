@@ -66,7 +66,7 @@ export function LaunchSniperPanel({ sniper, tradingWallet }: Props) {
           {tradingWallet.sessionActive && (
             <span className="auto-bot__wallet-summary mono muted">
               {tradingWallet.usdcLabel} USDC
-              {tradingWallet.zapApproved ? " · ready" : " · approve Zap"}
+              {tradingWallet.zapApproved ? " · ready" : " · approve USDC"}
             </span>
           )}
         </summary>

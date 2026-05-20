@@ -33,6 +33,8 @@ import {
   unrealizedPnlUsd,
 } from "../lib/portfolio";
 import { HoneypotBadge } from "./HoneypotBadge";
+import { formatTradeSimError } from "../lib/tradeSimError";
+import { useUsdcBalance } from "../hooks/useUsdcBalance";
 
 const PRESETS_BUY = ["20", "50", "100", "250"];
 const MIN_BUY_USDC = 20;
@@ -63,6 +65,7 @@ export function TradeSwapForm({
   const debouncedAmount = useDebouncedValue(amount, 400);
   const tokenAddr = token.address as `0x${string}`;
   const { balance: tokenBalance, refetch: refetchTokenBalance } = useErc20Balance(tokenAddr);
+  const { balance: usdcBalance } = useUsdcBalance();
 
   const fillRef = useRef<{
     side: "buy" | "sell";
@@ -134,10 +137,16 @@ export function TradeSwapForm({
   const quoteOut = sim.data?.result as bigint | undefined;
   const minOut =
     quoteOut !== undefined ? applySlippageMin(quoteOut, slippageBps) : undefined;
-  const quoteError = sim.error?.message?.split("\n")[0];
+  const quoteError = formatTradeSimError(sim.error);
 
   const buyTooSmall =
     side === "buy" && buyUsdc !== null && buyUsdc < parseUnits(String(MIN_BUY_USDC), 6);
+
+  const buyInsufficientUsdc =
+    side === "buy" &&
+    buyUsdc !== null &&
+    usdcBalance > 0n &&
+    usdcBalance < buyUsdc;
 
   const disabled =
     !isConnected ||
@@ -355,6 +364,11 @@ export function TradeSwapForm({
           />
           <span className="unit">{side === "buy" ? "USDC" : token.ticker}</span>
         </div>
+        {side === "buy" && (
+          <p className="bot-trade-balance muted">
+            USDC balance: {formatUsd(Number(formatUnits(usdcBalance, 6)))}
+          </p>
+        )}
         {(side === "sell" || position) && (
           <p className="bot-trade-balance muted">
             {side === "sell" && (
@@ -383,6 +397,11 @@ export function TradeSwapForm({
         )}
         {buyTooSmall && (
           <p className="bot-trade-msg bot-trade-msg--warn">Min buy ~{MIN_BUY_USDC} USDC</p>
+        )}
+        {buyInsufficientUsdc && (
+          <p className="bot-trade-msg bot-trade-msg--warn">
+            Not enough USDC — you have {formatUsd(Number(formatUnits(usdcBalance, 6)))}.
+          </p>
         )}
         <div className="amount-presets">
           {side === "buy"
@@ -417,10 +436,10 @@ export function TradeSwapForm({
           )}
         </p>
       )}
-      {quoteError && (buySim.isError || sellSim.isError) && (
+      {quoteError && sim.isError && (
         <p className="bot-trade-msg bot-trade-msg--warn">{quoteError}</p>
       )}
-      {honeypot?.canSell === true && (
+      {honeypot?.canSell === true && side === "sell" && !quoteError && (
         <p className="trade-quote-line muted">Sell path simulates OK</p>
       )}
 

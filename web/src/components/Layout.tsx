@@ -37,28 +37,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <footer className="site-footer">
 
         <span>
-
-          {SITE_NAME} · {SITE_DOMAIN} · powered by alt.fun Zap · HyperEVM
-
+          {SITE_NAME} · {SITE_DOMAIN} · alt.fun · HyperEVM
         </span>
 
         <Link to="/">Market</Link>
 
         <Link to="/bot">{BOT_NAME}</Link>
-
-        <a
-
-          href="https://docs.alt.fun/integrations"
-
-          target="_blank"
-
-          rel="noreferrer"
-
-        >
-
-          Docs
-
-        </a>
 
       </footer>
 

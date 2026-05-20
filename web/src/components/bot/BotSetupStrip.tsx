@@ -25,7 +25,7 @@ export function BotSetupStrip({ wallet, botRunning, tab }: Props) {
     },
     {
       id: "approve",
-      label: "Zap approved",
+      label: "USDC approved",
       done: wallet.zapApproved,
     },
     {

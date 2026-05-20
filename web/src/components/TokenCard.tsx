@@ -131,20 +131,15 @@ export function TokenCard({ token: t, rank }: Props) {
           )}
         </div>
 
-        {showsBondingCurve(t.lifecycle) && (
-          <BondingCurveBar token={t} variant="compact" />
-        )}
-
-        {!showsBondingCurve(t.lifecycle) &&
-          (t.description ? (
+        <div className="token-card__spotlight">
+          {showsBondingCurve(t.lifecycle) ? (
+            <BondingCurveBar token={t} variant="compact" />
+          ) : t.description ? (
             <p className="token-card__desc">{t.description}</p>
           ) : (
             <p className="token-card__desc token-card__desc--muted">{shortAddress(t.address)}</p>
-          ))}
-
-        {showsBondingCurve(t.lifecycle) && t.description && (
-          <p className="token-card__desc token-card__desc--short">{t.description}</p>
-        )}
+          )}
+        </div>
 
         <footer className="token-card__metrics">
           <Metric label="Market cap" value={formatUsd(t.mcapUsd)} />
