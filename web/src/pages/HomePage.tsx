@@ -1,8 +1,10 @@
 import { TokenFeed } from "../components/TokenFeed";
+import { PriceTickerBar } from "../components/PriceTickerBar";
 
 export function HomePage() {
   return (
-    <div className="layout">
+    <div className="market-page">
+      <PriceTickerBar />
       <TokenFeed />
     </div>
   );

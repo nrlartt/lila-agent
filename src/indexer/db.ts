@@ -610,6 +610,25 @@ export function getTrades(tokenAddress: string, limit = 30): TradeRow[] {
     .all(tokenAddress.toLowerCase(), limit) as TradeRow[];
 }
 
+export type RecentTradeWithToken = TradeRow & {
+  ticker: string | null;
+  name: string | null;
+};
+
+/** Latest trades across all tokens from the local chain indexer. */
+export function getRecentTradesGlobal(limit = 30): RecentTradeWithToken[] {
+  const take = Math.min(Math.max(limit, 1), 100);
+  return getDb()
+    .prepare(
+      `SELECT tr.*, tok.ticker, tok.name
+       FROM trades tr
+       LEFT JOIN tokens tok ON tok.address = tr.token_address
+       ORDER BY tr.created_at DESC, tr.id DESC
+       LIMIT ?`,
+    )
+    .all(take) as RecentTradeWithToken[];
+}
+
 /** @deprecated use queryTokens */
 export function listTokens(limit = 50, lifecycle?: Lifecycle): TokenRow[] {
   return queryTokens({ limit, lifecycle, category: lifecycle ?? "all" });

@@ -72,6 +72,22 @@ export type HoneypotCheck = {
   checkedAt: number;
 };
 
+export type GlobalTrade = {
+  id: string;
+  token: string;
+  ticker: string;
+  name: string;
+  trader: string;
+  isBuy: boolean;
+  usdcAmount: string;
+  createdAt: number;
+  txHash?: string;
+};
+
+export type TradesResponse = {
+  trades: GlobalTrade[];
+};
+
 export type Trade = {
   id: number;
   trader: string;
@@ -121,6 +137,12 @@ export type TokensResponse = {
 };
 
 const API = import.meta.env.VITE_API_URL || "";
+
+export async function fetchRecentTrades(limit = 30): Promise<TradesResponse> {
+  const res = await fetch(`${API}/api/trades?limit=${limit}`);
+  if (!res.ok) return { trades: [] };
+  return res.json();
+}
 
 export async function fetchStats(): Promise<GlobalStats> {
   const res = await fetch(`${API}/api/stats`);

@@ -6583,4 +6583,81 @@ a:hover {
   font-size: 0.78rem;
 }
 
+/* ——— Market page: ticker ——— */
+.market-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.price-ticker {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(10, 14, 22, 0.85);
+  mask-image: linear-gradient(90deg, transparent, black 4%, black 96%, transparent);
+}
+
+.price-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 55s linear infinite;
+  gap: 0;
+}
+
+.price-ticker__track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.price-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1rem;
+  border-right: 1px solid var(--border);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.price-ticker__item:hover {
+  background: rgba(52, 211, 153, 0.06);
+  color: inherit;
+}
+
+.price-ticker__ticker {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.price-ticker__price {
+  color: var(--text);
+}
+
+.price-ticker__change {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.price-ticker__change.up {
+  color: var(--buy);
+}
+
+.price-ticker__change.down {
+  color: var(--sell);
+}
 

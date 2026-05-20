@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   countTokens,
   getGlobalStats,
+  getRecentTradesGlobal,
   getToken,
   getTrades,
   queryTokens,
@@ -18,6 +19,7 @@ import {
   fetchApiChart,
   fetchApiHolders,
   fetchApiTradesForToken,
+  fetchRecentGlobalTrades,
   refreshTokenFromApi,
 } from "../indexer/altfun-api.js";
 import { setIndexerBroadcast, startLiveIndexer } from "../indexer/sync.js";
@@ -108,6 +110,67 @@ const CATEGORIES: TokenCategory[] = [
 ];
 
 app.get("/api/stats", (c) => c.json(getGlobalStats()));
+
+app.get("/api/trades", async (c) => {
+  const limit = Math.min(Math.max(Number(c.req.query("limit") ?? 30), 1), 80);
+
+  type TradeDto = {
+    id: string;
+    token: string;
+    ticker: string;
+    name: string;
+    trader: string;
+    isBuy: boolean;
+    usdcAmount: string;
+    createdAt: number;
+    txHash: string;
+    source: "altfun" | "chain";
+  };
+
+  const mapLocal = (): TradeDto[] =>
+    getRecentTradesGlobal(limit).map((tr) => ({
+      id: `chain-${tr.id}`,
+      token: tr.token_address.toLowerCase(),
+      ticker: tr.ticker ?? "???",
+      name: tr.name ?? tr.token_address.slice(0, 10),
+      trader: tr.trader.toLowerCase(),
+      isBuy: tr.is_buy === 1,
+      usdcAmount: tr.lt_amount,
+      createdAt: tr.created_at,
+      txHash: tr.tx_hash,
+      source: "chain" as const,
+    }));
+
+  try {
+    const apiTrades = await fetchRecentGlobalTrades(limit);
+    if (apiTrades.length === 0) {
+      return c.json({ trades: mapLocal() });
+    }
+
+    const trades = await Promise.all(
+      apiTrades.map(async (tr) => {
+        await ensureTokenInDb(tr.tokenAddress).catch(() => {});
+        const token = getToken(tr.tokenAddress);
+        const row = apiTradeToRow(tr, tr.tokenAddress);
+        return {
+          id: tr.id,
+          token: tr.tokenAddress.toLowerCase(),
+          ticker: token?.ticker ?? "???",
+          name: token?.name ?? tr.tokenAddress.slice(0, 10),
+          trader: tr.trader.toLowerCase(),
+          isBuy: tr.isBuy,
+          usdcAmount: tr.usdcAmount,
+          createdAt: row.created_at,
+          txHash: row.tx_hash,
+          source: "altfun" as const,
+        };
+      }),
+    );
+    return c.json({ trades });
+  } catch {
+    return c.json({ trades: mapLocal() });
+  }
+});
 
 app.get("/api/tokens", (c) => {
   const limit = Math.min(Number(c.req.query("limit") ?? 50), 200);
