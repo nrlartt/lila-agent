@@ -1,0 +1,35 @@
+{
+
+  "name": "Lila Agent",
+
+  "short_name": "Lila",
+
+  "description": "Lila Agent — monitor and trade HyperEVM tokens via alt.fun Zap",
+
+  "start_url": "/bot",
+
+  "display": "standalone",
+
+  "background_color": "#06080d",
+
+  "theme_color": "#06080d",
+
+  "icons": [
+
+    {
+
+      "src": "/lila-icon.svg",
+
+      "sizes": "any",
+
+      "type": "image/svg+xml",
+
+      "purpose": "any"
+
+    }
+
+  ]
+
+}
+
+

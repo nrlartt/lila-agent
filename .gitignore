@@ -1,0 +1,11 @@
+node_modules/
+dist/
+web/dist/
+data/
+.env
+web/.env
+*.log
+.DS_Store
+*.db
+*.db-journal
+web/tsconfig.tsbuildinfo
